@@ -1,0 +1,10 @@
+TEAM_ID=
+
+PRODUCT_NAME=LabelMate
+PRODUCT_BUNDLE_IDENTIFIER=com.koti.labelmate$(TEAM_ID)
+
+CURRENT_PROJECT_VERSION=1
+MARKETING_VERSION=1.0
+
+// Surfaces Xcode at the non-default install location to gradle's KGP iOS tasks.
+DEVELOPER_DIR=/Applications/Dev Tools/Xcode.app/Contents/Developer
