@@ -49,7 +49,9 @@ change animates, screen transitions platform-default. **No decorative or looping
 ## Screens & behavior
 
 ### 1. Shop (root)
-- Top bar: "FreshCart" title (bold) + trailing cart icon with count badge (`accent` circle).
+- Top bar: "FreshCart" title (bold) + trailing icons: printer (opens Printer settings — the
+  persistent entry point for configuring or switching printers) and cart with count badge
+  (`accent` circle).
 - Search pill: magnifier + "Search for groceries…". Live substring filter on product name.
 - Chip row (horizontal): **Sort By** (toggles price low→high → high→low → off),
   **Category** (cycles All → Fruits → Vegetables), **Offers** (filters discounted items).
