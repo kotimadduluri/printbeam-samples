@@ -1,0 +1,20 @@
+# Gradle / Android
+**/build/
+.gradle/
+**/.gradle/
+local.properties
+**/local.properties
+captures/
+.externalNativeBuild/
+.cxx/
+
+# IDE
+.idea/
+**/.idea/
+*.iml
+.DS_Store
+
+# Xcode
+**/xcuserdata/
+**/DerivedData/
+*.xcworkspace/xcshareddata/swiftpm/Package.resolved
