@@ -14,8 +14,8 @@ enum PaperWidthOption: String, CaseIterable, Identifiable {
     }
 }
 
-/// UserDefaults-backed settings. Single source of truth for printer endpoint and ticket
-/// numbering — both the order screen and the printer service read through it so changes
+/// UserDefaults-backed settings. Single source of truth for printer endpoint and order
+/// numbering — both the order flow and the receipt printer read through it so changes
 /// in the Settings screen show up immediately on the next print.
 final class Settings: ObservableObject {
     static let shared = Settings()
@@ -77,7 +77,7 @@ final class Settings: ObservableObject {
     }
 
     /// Reads and increments the order counter atomically enough for a single-user app.
-    /// Returns the value that should appear on the ticket being printed *now*.
+    /// Returns the value that should appear on the receipt being printed *now*.
     func consumeNextOrderNumber() -> Int {
         let current = defaults.integer(forKey: Keys.nextOrderNumber)
         let value = current == 0 ? 1 : current
@@ -85,8 +85,8 @@ final class Settings: ObservableObject {
         return value
     }
 
-    /// Peek without consuming — used by the order screen so the user sees the number
-    /// they're about to print.
+    /// Peek without consuming — the order flow prints with the peeked number and only
+    /// consumes it once the print succeeds, so a failed print retries the same number.
     func peekNextOrderNumber() -> Int {
         let current = defaults.integer(forKey: Keys.nextOrderNumber)
         return current == 0 ? 1 : current

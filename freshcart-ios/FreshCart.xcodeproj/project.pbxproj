@@ -11,26 +11,26 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
-		AA0001000000000000000003 /* KitchenTicket.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = KitchenTicket.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		AA0001000000000000000003 /* FreshCart.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = FreshCart.app; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
-		AA0001000000000000000010 /* Exceptions for "KitchenTicket" folder in "KitchenTicket" target */ = {
+		AA0001000000000000000010 /* Exceptions for "FreshCart" folder in "FreshCart" target */ = {
 			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
 			membershipExceptions = (
 				Info.plist,
 			);
-			target = AA0001000000000000000020 /* KitchenTicket */;
+			target = AA0001000000000000000020 /* FreshCart */;
 		};
 /* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
-		AA0001000000000000000011 /* KitchenTicket */ = {
+		AA0001000000000000000011 /* FreshCart */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
 			exceptions = (
-				AA0001000000000000000010 /* Exceptions for "KitchenTicket" folder in "KitchenTicket" target */,
+				AA0001000000000000000010 /* Exceptions for "FreshCart" folder in "FreshCart" target */,
 			);
-			path = KitchenTicket;
+			path = FreshCart;
 			sourceTree = "<group>";
 		};
 /* End PBXFileSystemSynchronizedRootGroup section */
@@ -50,7 +50,7 @@
 		AA0001000000000000000040 = {
 			isa = PBXGroup;
 			children = (
-				AA0001000000000000000011 /* KitchenTicket */,
+				AA0001000000000000000011 /* FreshCart */,
 				AA0001000000000000000041 /* Frameworks */,
 				AA0001000000000000000042 /* Products */,
 			);
@@ -66,7 +66,7 @@
 		AA0001000000000000000042 /* Products */ = {
 			isa = PBXGroup;
 			children = (
-				AA0001000000000000000003 /* KitchenTicket.app */,
+				AA0001000000000000000003 /* FreshCart.app */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -74,9 +74,9 @@
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
-		AA0001000000000000000020 /* KitchenTicket */ = {
+		AA0001000000000000000020 /* FreshCart */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = AA0001000000000000000051 /* Build configuration list for PBXNativeTarget "KitchenTicket" */;
+			buildConfigurationList = AA0001000000000000000051 /* Build configuration list for PBXNativeTarget "FreshCart" */;
 			buildPhases = (
 				AA0001000000000000000060 /* Sources */,
 				AA0001000000000000000030 /* Frameworks */,
@@ -87,14 +87,14 @@
 			dependencies = (
 			);
 			fileSystemSynchronizedGroups = (
-				AA0001000000000000000011 /* KitchenTicket */,
+				AA0001000000000000000011 /* FreshCart */,
 			);
-			name = KitchenTicket;
+			name = FreshCart;
 			packageProductDependencies = (
 				AA0002000000000000000002 /* PrintBeam */,
 			);
-			productName = KitchenTicket;
-			productReference = AA0001000000000000000003 /* KitchenTicket.app */;
+			productName = FreshCart;
+			productReference = AA0001000000000000000003 /* FreshCart.app */;
 			productType = "com.apple.product-type.application";
 		};
 /* End PBXNativeTarget section */
@@ -112,7 +112,7 @@
 					};
 				};
 			};
-			buildConfigurationList = AA0001000000000000000050 /* Build configuration list for PBXProject "KitchenTicket" */;
+			buildConfigurationList = AA0001000000000000000050 /* Build configuration list for PBXProject "FreshCart" */;
 			developmentRegion = en;
 			hasScannedForEncodings = 0;
 			knownRegions = (
@@ -129,7 +129,7 @@
 			projectDirPath = "";
 			projectRoot = "";
 			targets = (
-				AA0001000000000000000020 /* KitchenTicket */,
+				AA0001000000000000000020 /* FreshCart */,
 			);
 		};
 /* End PBXProject section */
@@ -207,7 +207,7 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				IPHONEOS_DEPLOYMENT_TARGET = 16.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
 				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
 				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
 				MTL_FAST_MATH = YES;
@@ -264,7 +264,7 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				IPHONEOS_DEPLOYMENT_TARGET = 16.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
 				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
 				MTL_ENABLE_DEBUG_INFO = NO;
 				MTL_FAST_MATH = YES;
@@ -281,15 +281,15 @@
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_ASSET_PATHS = "\"KitchenTicket/Preview Content\"";
+				DEVELOPMENT_ASSET_PATHS = "\"FreshCart/Preview Content\"";
 				DEVELOPMENT_TEAM = 35HYTYDMU3;
 				ENABLE_PREVIEWS = YES;
 				FRAMEWORK_SEARCH_PATHS = (
 					"$(inherited)",
-					"$(PROJECT_DIR)/KitchenTicket/Frameworks",
+					"$(PROJECT_DIR)/FreshCart/Frameworks",
 				);
 				GENERATE_INFOPLIST_FILE = NO;
-				INFOPLIST_FILE = KitchenTicket/Info.plist;
+				INFOPLIST_FILE = FreshCart/Info.plist;
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
@@ -300,7 +300,7 @@
 					"@executable_path/Frameworks",
 				);
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = com.koti.kitchenticket;
+				PRODUCT_BUNDLE_IDENTIFIER = com.freshcart.app;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_VERSION = 5.0;
@@ -315,15 +315,15 @@
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_ASSET_PATHS = "\"KitchenTicket/Preview Content\"";
+				DEVELOPMENT_ASSET_PATHS = "\"FreshCart/Preview Content\"";
 				DEVELOPMENT_TEAM = 35HYTYDMU3;
 				ENABLE_PREVIEWS = YES;
 				FRAMEWORK_SEARCH_PATHS = (
 					"$(inherited)",
-					"$(PROJECT_DIR)/KitchenTicket/Frameworks",
+					"$(PROJECT_DIR)/FreshCart/Frameworks",
 				);
 				GENERATE_INFOPLIST_FILE = NO;
-				INFOPLIST_FILE = KitchenTicket/Info.plist;
+				INFOPLIST_FILE = FreshCart/Info.plist;
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
@@ -334,7 +334,7 @@
 					"@executable_path/Frameworks",
 				);
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = com.koti.kitchenticket;
+				PRODUCT_BUNDLE_IDENTIFIER = com.freshcart.app;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_VERSION = 5.0;
@@ -364,7 +364,7 @@
 /* End XCSwiftPackageProductDependency section */
 
 /* Begin XCConfigurationList section */
-		AA0001000000000000000050 /* Build configuration list for PBXProject "KitchenTicket" */ = {
+		AA0001000000000000000050 /* Build configuration list for PBXProject "FreshCart" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				AA0001000000000000000080 /* Debug */,
@@ -373,7 +373,7 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		AA0001000000000000000051 /* Build configuration list for PBXNativeTarget "KitchenTicket" */ = {
+		AA0001000000000000000051 /* Build configuration list for PBXNativeTarget "FreshCart" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				AA0001000000000000000082 /* Debug */,

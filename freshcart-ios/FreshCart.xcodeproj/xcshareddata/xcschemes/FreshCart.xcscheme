@@ -15,9 +15,9 @@
             <BuildableReference
                BuildableIdentifier = "primary"
                BlueprintIdentifier = "AA0001000000000000000020"
-               BuildableName = "KitchenTicket.app"
-               BlueprintName = "KitchenTicket"
-               ReferencedContainer = "container:KitchenTicket.xcodeproj">
+               BuildableName = "FreshCart.app"
+               BlueprintName = "FreshCart"
+               ReferencedContainer = "container:FreshCart.xcodeproj">
             </BuildableReference>
          </BuildActionEntry>
       </BuildActionEntries>
@@ -45,9 +45,9 @@
          <BuildableReference
             BuildableIdentifier = "primary"
             BlueprintIdentifier = "AA0001000000000000000020"
-            BuildableName = "KitchenTicket.app"
-            BlueprintName = "KitchenTicket"
-            ReferencedContainer = "container:KitchenTicket.xcodeproj">
+            BuildableName = "FreshCart.app"
+            BlueprintName = "FreshCart"
+            ReferencedContainer = "container:FreshCart.xcodeproj">
          </BuildableReference>
       </BuildableProductRunnable>
    </LaunchAction>
@@ -62,9 +62,9 @@
          <BuildableReference
             BuildableIdentifier = "primary"
             BlueprintIdentifier = "AA0001000000000000000020"
-            BuildableName = "KitchenTicket.app"
-            BlueprintName = "KitchenTicket"
-            ReferencedContainer = "container:KitchenTicket.xcodeproj">
+            BuildableName = "FreshCart.app"
+            BlueprintName = "FreshCart"
+            ReferencedContainer = "container:FreshCart.xcodeproj">
          </BuildableReference>
       </BuildableProductRunnable>
    </ProfileAction>

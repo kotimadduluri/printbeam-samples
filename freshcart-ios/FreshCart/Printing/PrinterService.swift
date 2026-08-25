@@ -2,20 +2,9 @@ import Foundation
 import CoreBluetooth
 import PrintBeam
 
-enum PrinterServiceError: LocalizedError {
-    case printerFailure(String)
-
-    var errorDescription: String? {
-        switch self {
-        case .printerFailure(let msg): return msg
-        }
-    }
-}
-
-/// Thin wrapper around the `PrintBeam` facade. The facade holds one connection per printer
-/// across tickets, so back-to-back orders don't pay a fresh TCP connect each time; a dead
-/// link is reopened and retried once automatically.
-struct PrinterService {
+/// One-time PrintBeam setup plus the scan bridge. The receipt path lives behind
+/// `ReceiptPrinting` — this file is the only other place the SDK is touched.
+enum PrinterService {
 
     /// Call once from the app root before anything prints or scans. Kotlin default arguments
     /// don't carry across the Swift bridge, so every config parameter is spelled out.
@@ -35,53 +24,6 @@ struct PrinterService {
             // Only throws when re-initializing while printers are connected — impossible at
             // app launch, so surface loudly in debug rather than limping along unprinted.
             assertionFailure("PrintBeam.initialize failed: \(error)")
-        }
-    }
-
-    func printKitchenTicket(
-        tableNumber: String,
-        orderNumber: Int,
-        items: [String]
-    ) async throws {
-        let settings = Settings.shared
-        let endpoint = PrinterEndpoint.Network(host: settings.host, port: Int32(settings.port))
-        let paper: PaperWidth
-        switch settings.paperWidth {
-        case .mm58: paper = PaperWidth.mm58
-        case .mm80: paper = PaperWidth.mm80
-        }
-
-        // Same endpoint → same stable id, and re-registering just refreshes the entry, so
-        // this is safe to call per ticket. PrintBeam keeps the id's connection open between
-        // calls — printing ticket #2 skips the connect entirely.
-        let printerId = try PrintBeam.shared.addManualPrinter(
-            endpoint: endpoint,
-            name: settings.printerName,
-            paperWidth: paper
-        )
-
-        let result = try await PrintBeam.shared.print(printerId: printerId, block: { builder in
-            builder.align(alignment: Alignment.center)
-            builder.bold { _ in
-                builder.text(value: "KITCHEN")
-            }
-            builder.divider(char: "-")
-            builder.align(alignment: Alignment.left)
-            builder.text(value: "Table \(tableNumber)")
-            builder.feed(lines: 1)
-            builder.size(width: 2, height: 2) { _ in
-                builder.text(value: String(format: "Order #%03d", orderNumber))
-            }
-            builder.divider(char: "-")
-            for item in items where !item.isEmpty {
-                builder.text(value: item)
-            }
-            builder.feed(lines: 1)
-            builder.cut(partial: false)
-        })
-
-        if let failure = result as? PrintResult.Failure {
-            throw PrinterServiceError.printerFailure(failure.exception.message ?? "Unknown printer error")
         }
     }
 }

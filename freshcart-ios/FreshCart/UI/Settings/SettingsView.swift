@@ -1,6 +1,9 @@
 import SwiftUI
 import PrintBeam
 
+/// Printer setup: scan the LAN for ESC/POS printers or type an address by hand.
+/// This screen (plus the scanner bridge) is the SDK-demo core — restyled to the
+/// FreshCart tokens but functionally unchanged.
 struct SettingsView: View {
     @ObservedObject private var settings = Settings.shared
     @State private var scanner = PrinterScanner()
@@ -12,7 +15,7 @@ struct SettingsView: View {
 
     var body: some View {
         ScrollView {
-            VStack(spacing: 24) {
+            VStack(spacing: 16) {
                 if settings.host.isEmpty {
                     EmptyHero(
                         onScan: { startScan() },
@@ -30,12 +33,12 @@ struct SettingsView: View {
                     PaperWidthSection(selection: $settings.paperWidth)
                 }
             }
-            .padding(.horizontal, 16)
-            .padding(.vertical, 24)
+            .padding(16)
         }
-        .background(Color(.systemGroupedBackground))
+        .background(Color.fcGround)
         .navigationTitle("Printer")
-        .navigationBarTitleDisplayMode(.large)
+        .navigationBarTitleDisplayMode(.inline)
+        .toolbarBackground(Color.fcGround, for: .navigationBar)
         .sheet(isPresented: $showScanSheet) {
             ScanResultsSheet(
                 scanning: scanning,
@@ -63,6 +66,7 @@ struct SettingsView: View {
                     showScanSheet = false
                 }
             )
+            .tint(Color.fcAccent)
         }
         .sheet(isPresented: $showManualSheet) {
             ManualEntrySheet(
@@ -79,6 +83,7 @@ struct SettingsView: View {
                 },
                 onCancel: { showManualSheet = false }
             )
+            .tint(Color.fcAccent)
         }
     }
 
@@ -112,46 +117,54 @@ private struct ConnectedHero: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 16) {
             HStack(alignment: .top, spacing: 12) {
-                StatusBadge(systemName: "checkmark.circle.fill", tint: .white, background: .accentColor)
+                StatusBadge(systemName: "checkmark.circle.fill", tint: Color.fcOnAccent, background: Color.fcAccent)
                 VStack(alignment: .leading, spacing: 2) {
-                    Label("CONNECTED", systemImage: "checkmark")
-                        .labelStyle(.titleOnly)
-                        .font(.caption.weight(.semibold))
-                        .foregroundStyle(.tint)
+                    Text("CONNECTED")
+                        .font(.system(size: 11, weight: .semibold))
+                        .kerning(0.5)
+                        .foregroundStyle(Color.fcAccent)
                     Text(name ?? "Manual configuration")
-                        .font(.title3.weight(.semibold))
+                        .font(.system(size: 17, weight: .semibold))
+                        .foregroundStyle(Color.fcInk)
                     Text("\(host) : \(port)")
-                        .font(.subheadline)
-                        .foregroundStyle(.secondary)
+                        .font(.system(size: 14))
+                        .foregroundStyle(Color.fcMuted)
                     if let manufacturer = manufacturer {
                         Text(manufacturer)
-                            .font(.caption)
+                            .font(.system(size: 12))
+                            .foregroundStyle(Color.fcAccent)
                             .padding(.horizontal, 8)
                             .padding(.vertical, 3)
-                            .background(Color.accentColor.opacity(0.15))
-                            .clipShape(Capsule())
+                            .background(Color.fcAccent.opacity(0.12), in: Capsule())
                             .padding(.top, 4)
                     }
                 }
                 Spacer()
             }
-            HStack(spacing: 12) {
+            HStack(spacing: 10) {
                 Button(action: onChange) {
                     Label("Change", systemImage: "arrow.triangle.2.circlepath")
+                        .font(.system(size: 14, weight: .semibold))
+                        .foregroundStyle(Color.fcAccent)
                         .frame(maxWidth: .infinity)
+                        .padding(.vertical, 11)
+                        .background(Color.fcAccent.opacity(0.1), in: Capsule())
                 }
-                .buttonStyle(.bordered)
+                .buttonStyle(PressableButtonStyle())
 
-                Button(role: .destructive, action: onDisconnect) {
+                Button(action: onDisconnect) {
                     Label("Disconnect", systemImage: "xmark")
+                        .font(.system(size: 14, weight: .semibold))
+                        .foregroundStyle(.red)
                         .frame(maxWidth: .infinity)
+                        .padding(.vertical, 11)
+                        .background(Color.red.opacity(0.08), in: Capsule())
                 }
-                .buttonStyle(.bordered)
+                .buttonStyle(PressableButtonStyle())
             }
         }
         .padding(20)
-        .background(Color.accentColor.opacity(0.12))
-        .clipShape(RoundedRectangle(cornerRadius: 20))
+        .fcCard()
     }
 }
 
@@ -163,33 +176,33 @@ private struct EmptyHero: View {
         VStack(spacing: 16) {
             StatusBadge(
                 systemName: "printer",
-                tint: .secondary,
-                background: Color(.systemGray5),
+                tint: Color.fcMuted,
+                background: Color.fcGround,
                 size: 72
             )
             VStack(spacing: 4) {
                 Text("No printer connected")
-                    .font(.title3.weight(.semibold))
-                Text("Find a printer on your WiFi network to start printing kitchen tickets.")
-                    .font(.subheadline)
-                    .foregroundStyle(.secondary)
+                    .font(.system(size: 17, weight: .semibold))
+                    .foregroundStyle(Color.fcInk)
+                Text("Find a printer on your WiFi network to start printing receipts.")
+                    .font(.system(size: 14))
+                    .foregroundStyle(Color.fcMuted)
                     .multilineTextAlignment(.center)
             }
-            Button(action: onScan) {
+            Button {
+                onScan()
+            } label: {
                 Label("Find Printer", systemImage: "magnifyingglass")
-                    .frame(maxWidth: .infinity)
-                    .padding(.vertical, 4)
             }
-            .buttonStyle(.borderedProminent)
-            .controlSize(.large)
+            .buttonStyle(AccentPillButtonStyle())
 
             Button("Enter IP address manually", action: onManual)
-                .font(.subheadline)
+                .font(.system(size: 14, weight: .medium))
+                .foregroundStyle(Color.fcAccent)
         }
         .padding(24)
         .frame(maxWidth: .infinity)
-        .background(Color(.secondarySystemGroupedBackground))
-        .clipShape(RoundedRectangle(cornerRadius: 20))
+        .fcCard()
     }
 }
 
@@ -219,10 +232,11 @@ private struct PaperWidthSection: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 8) {
             Text("Paper width")
-                .font(.headline)
+                .font(.system(size: 15, weight: .semibold))
+                .foregroundStyle(Color.fcInk)
             Text("The width of the roll loaded in your printer.")
-                .font(.caption)
-                .foregroundStyle(.secondary)
+                .font(.system(size: 12))
+                .foregroundStyle(Color.fcMuted)
             Picker("Paper width", selection: $selection) {
                 ForEach(PaperWidthOption.allCases) { opt in
                     Text(opt.displayName).tag(opt)
@@ -233,8 +247,7 @@ private struct PaperWidthSection: View {
         }
         .padding(20)
         .frame(maxWidth: .infinity, alignment: .leading)
-        .background(Color(.secondarySystemGroupedBackground))
-        .clipShape(RoundedRectangle(cornerRadius: 16))
+        .fcCard()
     }
 }
 
@@ -260,7 +273,7 @@ private struct ScanResultsSheet: View {
                             .font(.headline)
                         Text("Make sure your printer is on and connected to the same WiFi as this device.")
                             .font(.subheadline)
-                            .foregroundStyle(.secondary)
+                            .foregroundStyle(Color.fcMuted)
                             .multilineTextAlignment(.center)
                             .padding(.horizontal)
                     }
@@ -279,7 +292,7 @@ private struct ScanResultsSheet: View {
                 } else if results.isEmpty {
                     EmptyState(
                         systemImage: "wifi.exclamationmark",
-                        tint: .secondary,
+                        tint: Color.fcMuted,
                         title: "No printers responded",
                         message: "Check that your printer is powered on and connected to the same WiFi network as this device.",
                         primaryButtonTitle: "Try again",
@@ -302,6 +315,7 @@ private struct ScanResultsSheet: View {
                         } footer: {
                             Button("Don't see your printer? Enter IP manually", action: onManual)
                                 .font(.subheadline)
+                                .foregroundStyle(Color.fcAccent)
                                 .padding(.vertical, 4)
                         }
                     }
@@ -335,8 +349,8 @@ private struct DiscoveredRow: View {
         HStack(spacing: 12) {
             StatusBadge(
                 systemName: "printer.fill",
-                tint: .accentColor,
-                background: Color.accentColor.opacity(0.15),
+                tint: Color.fcAccent,
+                background: Color.fcAccent.opacity(0.12),
                 size: 40
             )
             VStack(alignment: .leading, spacing: 2) {
@@ -382,18 +396,17 @@ private struct EmptyState: View {
                 Text(title).font(.headline)
                 Text(message)
                     .font(.subheadline)
-                    .foregroundStyle(.secondary)
+                    .foregroundStyle(Color.fcMuted)
                     .multilineTextAlignment(.center)
                     .padding(.horizontal)
             }
             VStack(spacing: 8) {
-                Button(action: onPrimary) {
-                    Text(primaryButtonTitle).frame(maxWidth: .infinity)
-                }
-                .buttonStyle(.borderedProminent)
+                Button(primaryButtonTitle, action: onPrimary)
+                    .buttonStyle(AccentPillButtonStyle())
 
                 Button(secondaryButtonTitle, action: onSecondary)
                     .font(.subheadline)
+                    .foregroundStyle(Color.fcAccent)
             }
             .padding(.horizontal, 32)
         }
@@ -458,7 +471,7 @@ private struct ManualEntrySheet: View {
         let trimmed = host.trimmingCharacters(in: .whitespaces)
         let port = Int(portText) ?? -1
         hostError = trimmed.isEmpty ? "Required" : nil
-        portError = (port < 1 || port > 65535) ? "1–65535" : nil
+        portError = (port < 1 || port > 65535) ? "1-65535" : nil
         if hostError != nil || portError != nil { return }
         onSave(trimmed, port)
     }
