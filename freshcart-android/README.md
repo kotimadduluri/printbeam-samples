@@ -1,8 +1,8 @@
-# BrewLog POS — PrintBeam on native Android
+# FreshCart — PrintBeam on native Android
 
-A café point-of-sale app (Kotlin + Jetpack Compose) that prints customer receipts over WiFi
-or Bluetooth LE. This is the reference integration of PrintBeam in a **single-platform
-Android app**.
+A quick-commerce grocery app (Kotlin + Jetpack Compose) that prints order receipts over
+WiFi or Bluetooth LE when you place an order. This is the reference integration of
+PrintBeam in a **single-platform Android app**.
 
 ## The dependency
 
@@ -25,10 +25,15 @@ dependencies {
 
 | What | Where | The pattern |
 |---|---|---|
-| One-time init | [`BrewLogApp.kt`](app/src/main/java/com/brewlog/pos/BrewLogApp.kt) | `PrintBeam.initialize(PrintBeamConfig(context = PrinterContext(this)))` in `Application.onCreate` — once per process, before any screen |
-| Print | [`OrderViewModel.kt`](app/src/main/java/com/brewlog/pos/ui/OrderViewModel.kt) | `addManualPrinter(endpoint, name, paperWidth)` → stable id → `PrintBeam.print(id) { …receipt DSL… }`. Transport failures return `PrintResult.Failure`; only invalid receipt content throws. The connection is held between prints |
-| Streaming scan | [`SettingsViewModel.kt`](app/src/main/java/com/brewlog/pos/ui/SettingsViewModel.kt) | `PrintBeam.scan(transports, listener)` — results stream into the dialog as printers respond; rows keyed by `printer.id` because enrichment re-emits; `ScanHandle.cancel()` on dismiss and `onCleared` |
+| One-time init | [`FreshCartApp.kt`](app/src/main/java/com/freshcart/FreshCartApp.kt) | `PrintBeam.initialize(PrintBeamConfig(context = PrinterContext(this)))` in `Application.onCreate` — once per process, before any screen |
+| Print | [`PrintBeamReceiptPrinter.kt`](app/src/main/java/com/freshcart/printing/PrintBeamReceiptPrinter.kt) | `addManualPrinter(endpoint, name, paperWidth)` → stable id → `PrintBeam.print(id) { …receipt DSL… }`. Transport failures return `PrintResult.Failure`; only invalid receipt content throws. The connection is held between prints |
+| Streaming scan | [`SettingsViewModel.kt`](app/src/main/java/com/freshcart/ui/settings/SettingsViewModel.kt) | `PrintBeam.scan(transports, listener)` — results stream into the dialog as printers respond; rows keyed by `printer.id` because enrichment re-emits; `ScanHandle.cancel()` on dismiss and `onCleared` |
 | Disconnect | same file | Re-derive the held session's id via `addManualPrinter(oldEndpoint)`, then `PrintBeam.disconnect(id)` |
+
+The SDK is fenced behind a seam: ViewModels depend on the
+[`ReceiptPrinter`](app/src/main/java/com/freshcart/printing/ReceiptPrinter.kt) interface,
+and only [`PrintBeamReceiptPrinter.kt`](app/src/main/java/com/freshcart/printing/PrintBeamReceiptPrinter.kt)
+and the settings/scan feature import `dev.printbeam.*` types.
 
 ## Platform notes
 
@@ -37,6 +42,10 @@ dependencies {
 - Scan callbacks arrive **on the main dispatcher** — safe to touch UI state directly.
 - Emulators sit on an isolated NAT network and can't see LAN printers; scan from a physical
   device, or use manual entry with your printer's IP.
+- Product art is large emoji — a deliberate, dependency-free placeholder for photography,
+  shared across all three FreshCart samples.
+- Order numbers come from a persisted SharedPreferences counter and are consumed only when
+  a print succeeds, so a failed print retries under the same order number.
 
 ## Run
 
@@ -44,5 +53,8 @@ dependencies {
 ./gradlew :app:installDebug
 ```
 
-Open **Settings** in the app → *Find printer* (scan) or *Enter manually* → back to the order
-screen → add items → **Print receipt**.
+Add groceries on the **Shop** screen → open the **cart** → **Place Order**. With no printer
+configured, that opens **Printer settings** (*Find Printer* scan or *Enter address
+manually*); once connected, placing the order prints the receipt and shows the order
+number. The printer icon in the Shop top bar opens the same settings screen any time, for
+configuring or switching printers.

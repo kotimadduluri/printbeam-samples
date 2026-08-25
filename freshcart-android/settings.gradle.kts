@@ -17,5 +17,5 @@ dependencyResolutionManagement {
     }
 }
 
-rootProject.name = "brewlog-android"
+rootProject.name = "freshcart-android"
 include(":app")

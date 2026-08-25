@@ -1,10 +1,10 @@
-package com.brewlog.pos.ui
+package com.freshcart.ui.settings
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
-import com.brewlog.pos.data.PrinterSettings
-import com.brewlog.pos.data.SettingsRepository
+import com.freshcart.data.PrinterSettings
+import com.freshcart.data.SettingsRepository
 import dev.printbeam.PaperWidth
 import dev.printbeam.PrinterEndpoint
 import dev.printbeam.PrinterException
@@ -220,7 +220,7 @@ class SettingsViewModel(
         val hostErr = if (host.isBlank()) "Required" else null
         val portErr = when {
             parsedPort == null -> "Number required"
-            parsedPort !in 1..65535 -> "1–65535"
+            parsedPort !in 1..65535 -> "1-65535"
             else -> null
         }
         if (hostErr != null || portErr != null) {

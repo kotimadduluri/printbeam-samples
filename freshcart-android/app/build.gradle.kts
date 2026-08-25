@@ -7,11 +7,11 @@ plugins {
 }
 
 android {
-    namespace = "com.brewlog.pos"
+    namespace = "com.freshcart"
     compileSdk = 36
 
     defaultConfig {
-        applicationId = "com.brewlog.pos"
+        applicationId = "com.freshcart"
         minSdk = 26
         targetSdk = 36
         versionCode = 1

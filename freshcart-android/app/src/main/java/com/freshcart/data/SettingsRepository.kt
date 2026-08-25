@@ -1,4 +1,4 @@
-package com.brewlog.pos.data
+package com.freshcart.data
 
 import android.content.Context
 import android.content.SharedPreferences
@@ -50,7 +50,7 @@ class SettingsRepository(context: Context) {
     }
 
     companion object {
-        private const val PREFS_NAME = "brewlog_printer_settings"
+        private const val PREFS_NAME = "freshcart_printer_settings"
         private const val KEY_TRANSPORT = "transport"
         private const val KEY_HOST = "host"
         private const val KEY_PORT = "port"

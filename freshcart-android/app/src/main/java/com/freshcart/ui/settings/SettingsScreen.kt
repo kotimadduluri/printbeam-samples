@@ -1,4 +1,4 @@
-package com.brewlog.pos.ui
+package com.freshcart.ui.settings
 
 import android.Manifest
 import android.content.pm.PackageManager
@@ -23,7 +23,6 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
@@ -31,7 +30,6 @@ import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.outlined.Bluetooth
 import androidx.compose.material.icons.outlined.Check
 import androidx.compose.material.icons.outlined.Edit
-import androidx.compose.material.icons.outlined.Print
 import androidx.compose.material.icons.outlined.PrintDisabled
 import androidx.compose.material.icons.outlined.Refresh
 import androidx.compose.material.icons.outlined.Search
@@ -39,8 +37,6 @@ import androidx.compose.material.icons.outlined.SearchOff
 import androidx.compose.material.icons.outlined.Warning
 import androidx.compose.material.icons.outlined.Wifi
 import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.AssistChip
-import androidx.compose.material3.AssistChipDefaults
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
@@ -59,6 +55,7 @@ import androidx.compose.material3.SingleChoiceSegmentedButtonRow
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -68,12 +65,16 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.core.content.ContextCompat
+import com.freshcart.ui.theme.FreshCartColors
+import com.freshcart.ui.theme.FreshCartShapes
 import dev.printbeam.PaperWidth
 import dev.printbeam.PrinterEndpoint
 import dev.printbeam.Transport
@@ -112,14 +113,18 @@ fun SettingsScreen(
     }
 
     Scaffold(
+        containerColor = MaterialTheme.colorScheme.background,
         topBar = {
             TopAppBar(
-                title = { Text("Printer") },
+                title = { Text("Printer", fontSize = 20.sp, fontWeight = FontWeight.Bold) },
                 navigationIcon = {
                     IconButton(onClick = onDone) {
                         Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
                     }
                 },
+                colors = TopAppBarDefaults.topAppBarColors(
+                    containerColor = MaterialTheme.colorScheme.background,
+                ),
             )
         },
     ) { padding ->
@@ -128,7 +133,7 @@ fun SettingsScreen(
                 .fillMaxSize()
                 .padding(padding)
                 .verticalScroll(rememberScrollState())
-                .padding(horizontal = 16.dp, vertical = 24.dp),
+                .padding(horizontal = 20.dp, vertical = 16.dp),
             verticalArrangement = Arrangement.spacedBy(24.dp),
         ) {
             if (state.isConnected) {
@@ -202,7 +207,7 @@ private fun ConnectedHero(
 ) {
     val endpointSubtitle = when (transport) {
         Transport.NETWORK -> "$host : $port"
-        Transport.BLE -> deviceId ?: "—"
+        Transport.BLE -> deviceId ?: "not set"
     }
     val transportLabel = when (transport) {
         Transport.NETWORK -> "WiFi"
@@ -214,15 +219,16 @@ private fun ConnectedHero(
     }
     Card(
         modifier = Modifier.fillMaxWidth(),
-        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.primaryContainer),
-        shape = RoundedCornerShape(20.dp),
+        colors = CardDefaults.cardColors(containerColor = FreshCartColors.Surface),
+        elevation = CardDefaults.cardElevation(defaultElevation = 1.dp),
+        shape = FreshCartShapes.Card,
     ) {
         Column(modifier = Modifier.padding(20.dp)) {
             Row(verticalAlignment = Alignment.CenterVertically) {
                 StatusBadge(
                     icon = transportIcon,
-                    background = MaterialTheme.colorScheme.primary,
-                    tint = MaterialTheme.colorScheme.onPrimary,
+                    background = FreshCartColors.Accent,
+                    tint = FreshCartColors.OnAccent,
                 )
                 Spacer(Modifier.width(12.dp))
                 Column(modifier = Modifier.weight(1f)) {
@@ -231,35 +237,40 @@ private fun ConnectedHero(
                             Icons.Outlined.Check,
                             contentDescription = null,
                             modifier = Modifier.size(14.dp),
-                            tint = MaterialTheme.colorScheme.primary,
+                            tint = FreshCartColors.Accent,
                         )
                         Spacer(Modifier.width(4.dp))
                         Text(
                             "CONNECTED · $transportLabel",
                             style = MaterialTheme.typography.labelSmall,
-                            color = MaterialTheme.colorScheme.primary,
+                            color = FreshCartColors.Accent,
                         )
                     }
                     Spacer(Modifier.height(2.dp))
                     Text(
                         name ?: defaultDisplayNameFor(transport),
                         style = MaterialTheme.typography.titleLarge,
-                        color = MaterialTheme.colorScheme.onPrimaryContainer,
+                        color = FreshCartColors.Ink,
                     )
                     Text(
                         endpointSubtitle,
                         style = MaterialTheme.typography.bodyMedium,
-                        color = MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.75f),
+                        color = FreshCartColors.Muted,
                     )
                     if (manufacturer != null) {
-                        Spacer(Modifier.height(4.dp))
-                        AssistChip(
-                            onClick = {},
-                            label = { Text(manufacturer) },
-                            colors = AssistChipDefaults.assistChipColors(
-                                containerColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.12f),
-                            ),
-                        )
+                        Spacer(Modifier.height(6.dp))
+                        androidx.compose.material3.Surface(
+                            shape = FreshCartShapes.Badge,
+                            color = FreshCartColors.Accent.copy(alpha = 0.10f),
+                        ) {
+                            Text(
+                                manufacturer,
+                                fontSize = 11.sp,
+                                fontWeight = FontWeight.Medium,
+                                color = FreshCartColors.Accent,
+                                modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp),
+                            )
+                        }
                     }
                 }
             }
@@ -298,8 +309,9 @@ private fun EmptyHero(
 ) {
     Card(
         modifier = Modifier.fillMaxWidth(),
-        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant),
-        shape = RoundedCornerShape(20.dp),
+        colors = CardDefaults.cardColors(containerColor = FreshCartColors.Surface),
+        elevation = CardDefaults.cardElevation(defaultElevation = 1.dp),
+        shape = FreshCartShapes.Card,
     ) {
         Column(
             modifier = Modifier
@@ -309,8 +321,8 @@ private fun EmptyHero(
         ) {
             StatusBadge(
                 icon = Icons.Outlined.PrintDisabled,
-                background = MaterialTheme.colorScheme.outline.copy(alpha = 0.2f),
-                tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                background = FreshCartColors.Ground,
+                tint = FreshCartColors.Muted,
                 size = 64.dp,
             )
             Spacer(Modifier.height(16.dp))
@@ -322,7 +334,7 @@ private fun EmptyHero(
             Text(
                 "Find a printer on your WiFi network, or enter the address of a network or Bluetooth printer manually.",
                 style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                color = FreshCartColors.Muted,
                 textAlign = TextAlign.Center,
             )
             Spacer(Modifier.height(20.dp))
@@ -373,7 +385,7 @@ private fun PaperWidthSection(
         Text(
             "The width of the roll loaded in your printer.",
             style = MaterialTheme.typography.bodySmall,
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            color = FreshCartColors.Muted,
         )
         Spacer(Modifier.height(4.dp))
         SingleChoiceSegmentedButtonRow(modifier = Modifier.fillMaxWidth()) {
@@ -427,7 +439,7 @@ private fun ScanDialog(
                         "Make sure your printer is on and connected to the same WiFi.",
                         style = MaterialTheme.typography.bodyMedium,
                         textAlign = TextAlign.Center,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        color = FreshCartColors.Muted,
                     )
                 }
                 error != null -> EmptyStateColumn(
@@ -482,7 +494,7 @@ private fun EmptyStateColumn(
             icon,
             contentDescription = null,
             modifier = Modifier.size(40.dp),
-            tint = MaterialTheme.colorScheme.onSurfaceVariant,
+            tint = FreshCartColors.Muted,
         )
         Spacer(Modifier.height(8.dp))
         Text(title, style = MaterialTheme.typography.titleMedium)
@@ -490,7 +502,7 @@ private fun EmptyStateColumn(
         Text(
             subtitle,
             style = MaterialTheme.typography.bodySmall,
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            color = FreshCartColors.Muted,
             textAlign = TextAlign.Center,
         )
     }
@@ -507,8 +519,8 @@ private fun DiscoveredCard(printer: DiscoveredPrinter, onPick: () -> Unit) {
         modifier = Modifier
             .fillMaxWidth()
             .clickable(onClick = onPick),
-        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
-        shape = RoundedCornerShape(12.dp),
+        colors = CardDefaults.cardColors(containerColor = FreshCartColors.Ground),
+        shape = FreshCartShapes.Card,
     ) {
         Row(
             modifier = Modifier
@@ -518,8 +530,8 @@ private fun DiscoveredCard(printer: DiscoveredPrinter, onPick: () -> Unit) {
         ) {
             StatusBadge(
                 icon = icon,
-                background = MaterialTheme.colorScheme.primary.copy(alpha = 0.12f),
-                tint = MaterialTheme.colorScheme.primary,
+                background = FreshCartColors.Accent.copy(alpha = 0.12f),
+                tint = FreshCartColors.Accent,
                 size = 40.dp,
             )
             Spacer(Modifier.width(12.dp))
@@ -532,14 +544,14 @@ private fun DiscoveredCard(printer: DiscoveredPrinter, onPick: () -> Unit) {
                     Text(
                         subtitle,
                         style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        color = FreshCartColors.Muted,
                     )
                 }
                 if (printer.manufacturer != null) {
                     Text(
                         printer.manufacturer!!,
                         style = MaterialTheme.typography.labelSmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        color = FreshCartColors.Muted,
                     )
                 }
             }
@@ -592,7 +604,7 @@ private fun ManualDialog(
                         Text(
                             "Type the printer's network address. You'll find this on the printer's display or a printed self-test page.",
                             style = MaterialTheme.typography.bodySmall,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            color = FreshCartColors.Muted,
                         )
                         OutlinedTextField(
                             value = host,
@@ -620,7 +632,7 @@ private fun ManualDialog(
                         Text(
                             "Type the printer's Bluetooth MAC address. You'll find it on the device's barcode label or in the manufacturer's app.",
                             style = MaterialTheme.typography.bodySmall,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            color = FreshCartColors.Muted,
                         )
                         OutlinedTextField(
                             value = bleDeviceId,

@@ -1,4 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <style name="Theme.BrewLog" parent="android:Theme.Material.Light.NoActionBar" />
+    <style name="Theme.FreshCart" parent="android:Theme.Material.Light.NoActionBar">
+        <!-- Matches the Compose "ground" token so there's no white flash before setContent. -->
+        <item name="android:windowBackground">#F4F6F3</item>
+    </style>
 </resources>
