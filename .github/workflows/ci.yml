@@ -1,0 +1,52 @@
+name: CI
+
+# Builds all three samples against the *published* PrintBeam SDK — the hosted Maven repo for
+# the Gradle apps, the Swift Package for the iOS app. A green badge here means the samples
+# track the current release and a fresh clone builds for anyone.
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  android:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 21
+      - uses: gradle/actions/setup-gradle@v4
+      - name: brewlog-android
+        working-directory: brewlog-android
+        run: ./gradlew :app:assembleDebug --stacktrace
+      - name: labelmate-kmp (Android)
+        working-directory: labelmate-kmp
+        run: ./gradlew :androidApp:assembleDebug --stacktrace
+
+  ios:
+    runs-on: macos-15
+    timeout-minutes: 40
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 21
+      - uses: gradle/actions/setup-gradle@v4
+      - name: kitchenticket-ios (SPM)
+        working-directory: kitchenticket-ios
+        run: >
+          xcodebuild -project KitchenTicket.xcodeproj -scheme KitchenTicket
+          -sdk iphonesimulator -destination 'generic/platform=iOS Simulator'
+          CODE_SIGNING_ALLOWED=NO build
+      - name: labelmate-kmp (iOS klib)
+        working-directory: labelmate-kmp
+        run: ./gradlew :shared:compileKotlinIosSimulatorArm64 --stacktrace
