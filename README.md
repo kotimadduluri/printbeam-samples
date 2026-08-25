@@ -1,41 +1,45 @@
-# PrintBeam Samples
+# PrintBeam Samples — FreshCart, three ways
 
 Official integration samples for **[PrintBeam](https://github.com/kotimadduluri/printbeam-sdk)** —
-the ESC/POS thermal printer SDK for Android, iOS, and Kotlin Multiplatform. Each app is a
-complete, runnable integration of one consumption scenario, built against the published SDK
-exactly the way your project would.
+the ESC/POS thermal printer SDK for Android, iOS, and Kotlin Multiplatform.
+
+All three apps are the **same product**: *FreshCart*, a quick-commerce grocery shop.
+Browse the catalog, add to cart, place the order — and the receipt prints on a real
+thermal printer through PrintBeam. Same design, same catalog, same receipt; three stacks.
+Compare any screen across the three implementations to see how the identical integration
+looks in each ecosystem.
 
 [![CI](https://github.com/kotimadduluri/printbeam-samples/actions/workflows/ci.yml/badge.svg)](https://github.com/kotimadduluri/printbeam-samples/actions/workflows/ci.yml)
 [![SDK version](https://img.shields.io/github/v/release/kotimadduluri/printbeam-sdk?include_prereleases&label=PrintBeam)](https://github.com/kotimadduluri/printbeam-sdk/releases)
 
-## Pick your scenario
+## Pick your stack
 
-| Your project is… | Sample | Gets PrintBeam via | Shows |
-|---|---|---|---|
-| **Native Android** (Kotlin, Compose) | [`brewlog-android/`](brewlog-android/) | Maven (`printbeam-android`) | Café POS: streaming scan, WiFi + BLE printing, held sessions, cash-drawer-free receipt flow |
-| **Native iOS** (Swift, SwiftUI) | [`kitchenticket-ios/`](kitchenticket-ios/) | Swift Package Manager | Kitchen tickets: the Kotlin→Swift bridge done right (`try await`, `ScanListener` from Swift) |
-| **Kotlin Multiplatform** (Compose MP) | [`labelmate-kmp/`](labelmate-kmp/) | Maven (`printbeam`) | Price labels with EAN-13 barcodes: all printing code in `commonMain`, one UI on two OSes |
+| Your project is… | Sample | Gets PrintBeam via |
+|---|---|---|
+| **Native Android** (Kotlin, Jetpack Compose, Material 3) | [`freshcart-android/`](freshcart-android/) | Maven (`printbeam-android`) |
+| **Native iOS** (Swift, SwiftUI, `@Observable`) | [`freshcart-ios/`](freshcart-ios/) | Swift Package Manager |
+| **Kotlin Multiplatform** (Compose Multiplatform) | [`freshcart-kmp/`](freshcart-kmp/) | Maven (`printbeam`) |
 
 Each sample's README lists the exact files where PrintBeam is touched — dependency,
-initialization, scan, print, disconnect — so you can lift the pattern without reading the
-whole app.
+initialization, scan, print — so you can lift the pattern without reading the whole app.
+The shared design system, catalog, receipt format, and architecture rules live in
+[`DESIGN.md`](DESIGN.md).
 
 ## Prerequisites
 
 - An ESC/POS thermal printer: **networked** (WiFi/Ethernet, TCP port 9100) or **BLE**.
-  No printer? Every app still runs — use manual entry to explore the API; prints fail
-  gracefully with a real error message.
-- Android samples: Android Studio (or just Gradle + an Android SDK), a device or emulator
-  (note: emulators can't reach printers on your LAN — use a physical device to print).
-- iOS sample: Xcode 16+, an iPhone or simulator (simulator can print to *network* printers
-  on your Mac's LAN; BLE needs a physical device).
+  No printer? The apps run fully — browse, cart, and checkout all work; the print step
+  fails gracefully with a real error message.
+- Android samples: Android Studio or Gradle + Android SDK; print from a physical device
+  (emulators can't reach LAN printers).
+- iOS sample: Xcode 16+; the simulator can print to network printers on your Mac's LAN.
 
 ## Build everything
 
 ```sh
-(cd brewlog-android   && ./gradlew :app:assembleDebug)
-(cd labelmate-kmp     && ./gradlew :androidApp:assembleDebug)
-(cd kitchenticket-ios && xcodebuild -project KitchenTicket.xcodeproj -scheme KitchenTicket \
+(cd freshcart-android && ./gradlew :app:assembleDebug)
+(cd freshcart-kmp     && ./gradlew :androidApp:assembleDebug)
+(cd freshcart-ios     && xcodebuild -project FreshCart.xcodeproj -scheme FreshCart \
     -sdk iphonesimulator -destination 'generic/platform=iOS Simulator' CODE_SIGNING_ALLOWED=NO build)
 ```
 

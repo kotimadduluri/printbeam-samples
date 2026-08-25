@@ -24,11 +24,11 @@ jobs:
           distribution: temurin
           java-version: 21
       - uses: gradle/actions/setup-gradle@v4
-      - name: brewlog-android
-        working-directory: brewlog-android
+      - name: freshcart-android
+        working-directory: freshcart-android
         run: ./gradlew :app:assembleDebug --stacktrace
-      - name: labelmate-kmp (Android)
-        working-directory: labelmate-kmp
+      - name: freshcart-kmp (Android)
+        working-directory: freshcart-kmp
         run: ./gradlew :androidApp:assembleDebug --stacktrace
 
   ios:
@@ -41,12 +41,12 @@ jobs:
           distribution: temurin
           java-version: 21
       - uses: gradle/actions/setup-gradle@v4
-      - name: kitchenticket-ios (SPM)
-        working-directory: kitchenticket-ios
+      - name: freshcart-ios (SPM)
+        working-directory: freshcart-ios
         run: >
           xcodebuild -project KitchenTicket.xcodeproj -scheme KitchenTicket
           -sdk iphonesimulator -destination 'generic/platform=iOS Simulator'
           CODE_SIGNING_ALLOWED=NO build
-      - name: labelmate-kmp (iOS klib)
-        working-directory: labelmate-kmp
+      - name: freshcart-kmp (iOS klib)
+        working-directory: freshcart-kmp
         run: ./gradlew :shared:compileKotlinIosSimulatorArm64 --stacktrace
