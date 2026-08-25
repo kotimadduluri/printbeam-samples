@@ -1,16 +1,17 @@
-package com.labelmate.data
+package com.freshcart.data
 
 import dev.printbeam.PaperWidth
 import dev.printbeam.Transport
 import platform.Foundation.NSUserDefaults
 
-private const val KEY_TRANSPORT = "labelmate.transport"
-private const val KEY_HOST = "labelmate.host"
-private const val KEY_PORT = "labelmate.port"
-private const val KEY_BLE_DEVICE_ID = "labelmate.bleDeviceId"
-private const val KEY_PAPER_WIDTH = "labelmate.paperWidth"
-private const val KEY_PRINTER_NAME = "labelmate.printerName"
-private const val KEY_MANUFACTURER = "labelmate.manufacturer"
+private const val KEY_TRANSPORT = "freshcart.transport"
+private const val KEY_HOST = "freshcart.host"
+private const val KEY_PORT = "freshcart.port"
+private const val KEY_BLE_DEVICE_ID = "freshcart.bleDeviceId"
+private const val KEY_PAPER_WIDTH = "freshcart.paperWidth"
+private const val KEY_PRINTER_NAME = "freshcart.printerName"
+private const val KEY_MANUFACTURER = "freshcart.manufacturer"
+private const val KEY_LAST_ORDER_NUMBER = "freshcart.lastOrderNumber"
 
 actual class SettingsStore {
     private val defaults = NSUserDefaults.standardUserDefaults
@@ -45,5 +46,12 @@ actual class SettingsStore {
         defaults.setObject(settings.paperWidth.name, KEY_PAPER_WIDTH)
         defaults.setObject(settings.printerName, KEY_PRINTER_NAME)
         defaults.setObject(settings.manufacturer, KEY_MANUFACTURER)
+    }
+
+    // An unset integer reads as 0, which is exactly the "no orders yet" baseline we want.
+    actual fun nextOrderNumber(): Int = defaults.integerForKey(KEY_LAST_ORDER_NUMBER).toInt() + 1
+
+    actual fun consumeOrderNumber(number: Int) {
+        defaults.setInteger(number.toLong(), KEY_LAST_ORDER_NUMBER)
     }
 }

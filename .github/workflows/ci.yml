@@ -44,7 +44,7 @@ jobs:
       - name: freshcart-ios (SPM)
         working-directory: freshcart-ios
         run: >
-          xcodebuild -project KitchenTicket.xcodeproj -scheme KitchenTicket
+          xcodebuild -project FreshCart.xcodeproj -scheme FreshCart
           -sdk iphonesimulator -destination 'generic/platform=iOS Simulator'
           CODE_SIGNING_ALLOWED=NO build
       - name: freshcart-kmp (iOS klib)

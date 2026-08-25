@@ -1,8 +1,8 @@
-package com.labelmate
+package com.freshcart
 
 import androidx.compose.ui.window.ComposeUIViewController
-import com.labelmate.data.SettingsStore
-import com.labelmate.ui.App
+import com.freshcart.data.SettingsStore
+import com.freshcart.ui.App
 import dev.printbeam.discovery.PrinterContext
 import dev.printbeam.sdk.PrintBeam
 import dev.printbeam.sdk.PrintBeamConfig

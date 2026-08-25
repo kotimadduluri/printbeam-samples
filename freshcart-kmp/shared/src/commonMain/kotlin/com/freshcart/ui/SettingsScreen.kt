@@ -1,11 +1,10 @@
-package com.labelmate.ui
+package com.freshcart.ui
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -13,23 +12,17 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.AssistChip
-import androidx.compose.material3.AssistChipDefaults
 import androidx.compose.material3.Button
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
@@ -37,64 +30,88 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SegmentedButton
 import androidx.compose.material3.SegmentedButtonDefaults
 import androidx.compose.material3.SingleChoiceSegmentedButtonRow
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
-import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.freshcart.ui.theme.FreshShapes
+import com.freshcart.ui.theme.FreshTokens
 import dev.printbeam.PaperWidth
 import dev.printbeam.PrinterEndpoint
 import dev.printbeam.Transport
 import dev.printbeam.discovery.DiscoveredPrinter
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun SettingsScreen(vm: AppViewModel, contentPadding: PaddingValues) {
+fun SettingsScreen(vm: SettingsViewModel, onBack: () -> Unit) {
+    val state by vm.uiState.collectAsState()
     val saveManual = rememberManualSaveAction(vm)
+    val snackbarHostState = remember { SnackbarHostState() }
+
+    LaunchedEffect(state.snackbarMessage) {
+        val msg = state.snackbarMessage
+        if (msg != null) {
+            snackbarHostState.showSnackbar(msg)
+            vm.dismissSnackbar()
+        }
+    }
 
     Scaffold(
-        contentWindowInsets = androidx.compose.foundation.layout.WindowInsets(0),
+        containerColor = FreshTokens.Ground,
+        snackbarHost = { SnackbarHost(snackbarHostState) },
         topBar = {
-            TopAppBar(
-                title = { Text("Printer") },
-                navigationIcon = {
-                    TextButton(onClick = { vm.navigate(Screen.Label) }) { Text("Back") }
-                },
-            )
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 8.dp, vertical = 8.dp),
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                TextButton(onClick = onBack) { Text("Back", color = FreshTokens.Accent) }
+                Spacer(Modifier.width(4.dp))
+                Text(
+                    "Printer",
+                    fontSize = 20.sp,
+                    fontWeight = FontWeight.Bold,
+                    color = FreshTokens.Ink,
+                )
+            }
         },
     ) { innerPadding ->
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(contentPadding)
                 .padding(innerPadding)
                 .verticalScroll(rememberScrollState())
-                .padding(horizontal = 16.dp, vertical = 24.dp),
-            verticalArrangement = Arrangement.spacedBy(24.dp),
+                .padding(horizontal = 16.dp, vertical = 16.dp),
+            verticalArrangement = Arrangement.spacedBy(20.dp),
         ) {
-            if (vm.isConnected) {
+            if (state.isConfigured) {
                 ConnectedHero(
-                    transport = vm.savedTransport,
-                    name = vm.selectedPrinterName,
-                    manufacturer = vm.selectedPrinterManufacturer,
-                    host = vm.savedHost,
-                    port = vm.savedPort,
-                    deviceId = vm.savedBleDeviceId,
+                    transport = state.saved.transport,
+                    name = state.saved.printerName,
+                    manufacturer = state.saved.manufacturer,
+                    host = state.saved.host,
+                    port = state.saved.port,
+                    deviceId = state.saved.bleDeviceId,
                     onChange = vm::startScan,
                     onDisconnect = vm::disconnect,
                 )
                 PaperWidthSection(
-                    selected = vm.paperWidth,
+                    selected = state.saved.paperWidth,
                     onSelect = vm::onPaperWidthChange,
                 )
             } else {
@@ -106,11 +123,11 @@ fun SettingsScreen(vm: AppViewModel, contentPadding: PaddingValues) {
             }
         }
 
-        if (vm.showScanDialog) {
+        if (state.showScanDialog) {
             ScanDialog(
-                scanning = vm.isScanning,
-                results = vm.scanResults,
-                error = vm.scanError,
+                scanning = state.isScanning,
+                results = state.scanResults,
+                error = state.scanError,
                 onPick = vm::pickDiscovered,
                 onRetry = vm::startScan,
                 onManual = {
@@ -121,16 +138,16 @@ fun SettingsScreen(vm: AppViewModel, contentPadding: PaddingValues) {
             )
         }
 
-        if (vm.showManualDialog) {
+        if (state.showManualDialog) {
             ManualDialog(
                 supportsBleManual = vm.supportsBleManual,
-                transport = vm.manualTransport,
-                host = vm.manualHost,
-                port = vm.manualPort,
-                bleDeviceId = vm.manualBleDeviceId,
-                hostError = vm.manualHostError,
-                portError = vm.manualPortError,
-                bleError = vm.manualBleError,
+                transport = state.manualTransport,
+                host = state.manualHost,
+                port = state.manualPort,
+                bleDeviceId = state.manualBleDeviceId,
+                hostError = state.manualHostError,
+                portError = state.manualPortError,
+                bleError = state.manualBleError,
                 onTransportChange = vm::onManualTransportChange,
                 onHostChange = vm::onManualHostChange,
                 onPortChange = vm::onManualPortChange,
@@ -155,57 +172,63 @@ private fun ConnectedHero(
 ) {
     val endpointSubtitle = when (transport) {
         Transport.NETWORK -> "$host : $port"
-        Transport.BLE -> deviceId ?: "—"
+        Transport.BLE -> deviceId ?: "-"
     }
     val transportLabel = when (transport) {
         Transport.NETWORK -> "WiFi"
         Transport.BLE -> "Bluetooth"
     }
-    Card(
+    Surface(
         modifier = Modifier.fillMaxWidth(),
-        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.primaryContainer),
-        shape = RoundedCornerShape(20.dp),
+        shape = FreshShapes.Card,
+        color = FreshTokens.Surface,
+        tonalElevation = 1.dp,
     ) {
         Column(modifier = Modifier.padding(20.dp)) {
             Row(verticalAlignment = Alignment.CenterVertically) {
                 CheckBadge(
-                    background = MaterialTheme.colorScheme.primary,
-                    tint = MaterialTheme.colorScheme.onPrimary,
+                    background = FreshTokens.Accent,
+                    tint = FreshTokens.OnAccent,
                 )
                 Spacer(Modifier.width(12.dp))
                 Column(modifier = Modifier.weight(1f)) {
                     Text(
                         "CONNECTED · $transportLabel",
                         style = MaterialTheme.typography.labelSmall,
-                        color = MaterialTheme.colorScheme.primary,
+                        color = FreshTokens.Accent,
                     )
                     Spacer(Modifier.height(2.dp))
                     Text(
                         name ?: defaultDisplayNameFor(transport),
                         style = MaterialTheme.typography.titleLarge,
-                        color = MaterialTheme.colorScheme.onPrimaryContainer,
+                        color = FreshTokens.Ink,
                     )
                     Text(
                         endpointSubtitle,
                         style = MaterialTheme.typography.bodyMedium,
-                        color = MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.75f),
+                        color = FreshTokens.Muted,
                     )
                     if (manufacturer != null) {
-                        Spacer(Modifier.height(6.dp))
-                        AssistChip(
-                            onClick = {},
-                            label = { Text(manufacturer) },
-                            colors = AssistChipDefaults.assistChipColors(
-                                containerColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.12f),
-                            ),
+                        Text(
+                            manufacturer,
+                            style = MaterialTheme.typography.labelSmall,
+                            color = FreshTokens.Muted,
                         )
                     }
                 }
             }
             Spacer(Modifier.height(16.dp))
             Row(horizontalArrangement = Arrangement.spacedBy(8.dp), modifier = Modifier.fillMaxWidth()) {
-                OutlinedButton(onClick = onChange, modifier = Modifier.weight(1f)) { Text("Change") }
-                OutlinedButton(onClick = onDisconnect, modifier = Modifier.weight(1f)) { Text("Disconnect") }
+                OutlinedButton(
+                    onClick = onChange,
+                    shape = FreshShapes.Pill,
+                    modifier = Modifier.weight(1f),
+                ) { Text("Change", color = FreshTokens.Accent) }
+                OutlinedButton(
+                    onClick = onDisconnect,
+                    shape = FreshShapes.Pill,
+                    modifier = Modifier.weight(1f),
+                ) { Text("Disconnect", color = FreshTokens.Accent) }
             }
         }
     }
@@ -222,10 +245,11 @@ private fun EmptyHero(
     onScan: () -> Unit,
     onManual: () -> Unit,
 ) {
-    Card(
+    Surface(
         modifier = Modifier.fillMaxWidth(),
-        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant),
-        shape = RoundedCornerShape(20.dp),
+        shape = FreshShapes.Card,
+        color = FreshTokens.Surface,
+        tonalElevation = 1.dp,
     ) {
         Column(
             modifier = Modifier
@@ -233,9 +257,9 @@ private fun EmptyHero(
                 .padding(24.dp),
             horizontalAlignment = Alignment.CenterHorizontally,
         ) {
-            EmptyBadge()
+            EmptyBadge(glyph = "?")
             Spacer(Modifier.height(16.dp))
-            Text("No printer connected", style = MaterialTheme.typography.titleLarge)
+            Text("No printer connected", style = MaterialTheme.typography.titleLarge, color = FreshTokens.Ink)
             Spacer(Modifier.height(4.dp))
             Text(
                 if (supportsBleManual)
@@ -243,48 +267,29 @@ private fun EmptyHero(
                 else
                     "Find a printer on your WiFi network, or enter its IP address manually.",
                 style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                color = FreshTokens.Muted,
                 textAlign = TextAlign.Center,
             )
             Spacer(Modifier.height(20.dp))
-            Button(onClick = onScan, modifier = Modifier.fillMaxWidth()) { Text("Find Printer") }
+            Button(
+                onClick = onScan,
+                shape = FreshShapes.Pill,
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = FreshTokens.Accent,
+                    contentColor = FreshTokens.OnAccent,
+                ),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(48.dp),
+            ) { Text("Find Printer", fontWeight = FontWeight.SemiBold) }
             Spacer(Modifier.height(8.dp))
             TextButton(onClick = onManual) {
-                Text(if (supportsBleManual) "Enter address manually" else "Enter IP address manually")
+                Text(
+                    if (supportsBleManual) "Enter address manually" else "Enter IP address manually",
+                    color = FreshTokens.Accent,
+                )
             }
         }
-    }
-}
-
-@Composable
-private fun CheckBadge(background: Color, tint: Color, size: Dp = 48.dp) {
-    Box(
-        modifier = Modifier.size(size).clip(CircleShape).background(background),
-        contentAlignment = Alignment.Center,
-    ) {
-        Text(
-            "✓",
-            color = tint,
-            fontWeight = FontWeight.Bold,
-            fontSize = (size.value * 0.5f).sp,
-        )
-    }
-}
-
-@Composable
-private fun EmptyBadge(size: Dp = 64.dp) {
-    Box(
-        modifier = Modifier
-            .size(size)
-            .clip(CircleShape)
-            .background(MaterialTheme.colorScheme.outline.copy(alpha = 0.18f)),
-        contentAlignment = Alignment.Center,
-    ) {
-        Text(
-            "?",
-            style = MaterialTheme.typography.headlineMedium,
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
-        )
     }
 }
 
@@ -294,11 +299,11 @@ private fun PaperWidthSection(
     onSelect: (PaperWidth) -> Unit,
 ) {
     Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-        Text("Paper width", style = MaterialTheme.typography.titleMedium)
+        Text("Paper width", style = MaterialTheme.typography.titleMedium, color = FreshTokens.Ink)
         Text(
             "The width of the roll loaded in your printer.",
             style = MaterialTheme.typography.bodySmall,
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            color = FreshTokens.Muted,
         )
         Spacer(Modifier.height(4.dp))
         SingleChoiceSegmentedButtonRow(modifier = Modifier.fillMaxWidth()) {
@@ -306,15 +311,25 @@ private fun PaperWidthSection(
                 selected = selected == PaperWidth.MM_58,
                 onClick = { onSelect(PaperWidth.MM_58) },
                 shape = SegmentedButtonDefaults.itemShape(index = 0, count = 2),
+                colors = paperWidthColors(),
             ) { Text("58 mm") }
             SegmentedButton(
                 selected = selected == PaperWidth.MM_80,
                 onClick = { onSelect(PaperWidth.MM_80) },
                 shape = SegmentedButtonDefaults.itemShape(index = 1, count = 2),
+                colors = paperWidthColors(),
             ) { Text("80 mm") }
         }
     }
 }
+
+@Composable
+private fun paperWidthColors() = SegmentedButtonDefaults.colors(
+    activeContainerColor = FreshTokens.Accent,
+    activeContentColor = FreshTokens.OnAccent,
+    inactiveContainerColor = FreshTokens.Surface,
+    inactiveContentColor = FreshTokens.Ink,
+)
 
 @Composable
 private fun ScanDialog(
@@ -344,13 +359,13 @@ private fun ScanDialog(
                     modifier = Modifier.fillMaxWidth().padding(vertical = 24.dp),
                     horizontalAlignment = Alignment.CenterHorizontally,
                 ) {
-                    CircularProgressIndicator()
+                    CircularProgressIndicator(color = FreshTokens.Accent)
                     Spacer(Modifier.height(16.dp))
                     Text(
                         "Make sure your printer is on and connected to the same WiFi.",
                         style = MaterialTheme.typography.bodyMedium,
                         textAlign = TextAlign.Center,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        color = FreshTokens.Muted,
                     )
                 }
                 error != null -> EmptyStateColumn(
@@ -373,15 +388,15 @@ private fun ScanDialog(
         },
         confirmButton = {
             if (!scanning && (error != null || results.isEmpty())) {
-                TextButton(onClick = onRetry) { Text("Try again") }
+                TextButton(onClick = onRetry) { Text("Try again", color = FreshTokens.Accent) }
             }
         },
         dismissButton = {
             Row {
                 if (!scanning) {
-                    TextButton(onClick = onManual) { Text("Enter manually") }
+                    TextButton(onClick = onManual) { Text("Enter manually", color = FreshTokens.Accent) }
                 }
-                TextButton(onClick = onDismiss) { Text("Close") }
+                TextButton(onClick = onDismiss) { Text("Close", color = FreshTokens.Accent) }
             }
         },
     )
@@ -398,7 +413,7 @@ private fun EmptyStateColumn(title: String, subtitle: String) {
         Text(
             subtitle,
             style = MaterialTheme.typography.bodySmall,
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            color = FreshTokens.Muted,
             textAlign = TextAlign.Center,
         )
     }
@@ -411,35 +426,44 @@ private fun DiscoveredCard(printer: DiscoveredPrinter, onPick: () -> Unit) {
         is PrinterEndpoint.Network -> "${endpoint.host} : ${endpoint.port}"
         is PrinterEndpoint.Ble -> endpoint.deviceId
     }
-    Card(
-        modifier = Modifier.fillMaxWidth().clickable(onClick = onPick),
-        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
-        shape = RoundedCornerShape(12.dp),
+    Surface(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clip(FreshShapes.Card)
+            .clickable(onClick = onPick),
+        color = FreshTokens.Ground,
+        shape = FreshShapes.Card,
     ) {
         Row(
             modifier = Modifier.fillMaxWidth().padding(12.dp),
             verticalAlignment = Alignment.CenterVertically,
         ) {
-            CheckBadge(
-                background = MaterialTheme.colorScheme.primary.copy(alpha = 0.12f),
-                tint = MaterialTheme.colorScheme.primary,
-                size = 40.dp,
-            )
+            Box(
+                modifier = Modifier
+                    .clip(CircleShape)
+                    .background(FreshTokens.Accent.copy(alpha = 0.12f)),
+            ) {
+                CheckBadge(
+                    background = androidx.compose.ui.graphics.Color.Transparent,
+                    tint = FreshTokens.Accent,
+                    size = 40.dp,
+                )
+            }
             Spacer(Modifier.width(12.dp))
             Column(modifier = Modifier.weight(1f)) {
-                Text(printer.name ?: subtitle, style = MaterialTheme.typography.bodyLarge)
+                Text(printer.name ?: subtitle, style = MaterialTheme.typography.bodyLarge, color = FreshTokens.Ink)
                 if (printer.name != null) {
                     Text(
                         subtitle,
                         style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        color = FreshTokens.Muted,
                     )
                 }
                 printer.manufacturer?.let { mfr ->
                     Text(
                         mfr,
                         style = MaterialTheme.typography.labelSmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        color = FreshTokens.Muted,
                     )
                 }
             }
@@ -475,11 +499,13 @@ private fun ManualDialog(
                             selected = transport == Transport.NETWORK,
                             onClick = { onTransportChange(Transport.NETWORK) },
                             shape = SegmentedButtonDefaults.itemShape(index = 0, count = 2),
+                            colors = paperWidthColors(),
                         ) { Text("WiFi") }
                         SegmentedButton(
                             selected = transport == Transport.BLE,
                             onClick = { onTransportChange(Transport.BLE) },
                             shape = SegmentedButtonDefaults.itemShape(index = 1, count = 2),
+                            colors = paperWidthColors(),
                         ) { Text("Bluetooth") }
                     }
                 }
@@ -489,7 +515,7 @@ private fun ManualDialog(
                         Text(
                             "Type the printer's network address. You'll find this on the printer's display or a printed self-test page.",
                             style = MaterialTheme.typography.bodySmall,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            color = FreshTokens.Muted,
                         )
                         OutlinedTextField(
                             value = host,
@@ -517,7 +543,7 @@ private fun ManualDialog(
                         Text(
                             "Type the printer's Bluetooth MAC address. You'll find it on the device's barcode label or in the manufacturer's app.",
                             style = MaterialTheme.typography.bodySmall,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            color = FreshTokens.Muted,
                         )
                         OutlinedTextField(
                             value = bleDeviceId,
@@ -537,10 +563,17 @@ private fun ManualDialog(
             }
         },
         confirmButton = {
-            Button(onClick = onSave) { Text("Save") }
+            Button(
+                onClick = onSave,
+                shape = FreshShapes.Pill,
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = FreshTokens.Accent,
+                    contentColor = FreshTokens.OnAccent,
+                ),
+            ) { Text("Save") }
         },
         dismissButton = {
-            TextButton(onClick = onDismiss) { Text("Cancel") }
+            TextButton(onClick = onDismiss) { Text("Cancel", color = FreshTokens.Accent) }
         },
     )
 }

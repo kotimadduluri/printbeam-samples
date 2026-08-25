@@ -7,7 +7,7 @@
 	objects = {
 
 /* Begin PBXFileReference section */
-		59AFC83FE23C187146AD1EC5 /* LabelMate.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = LabelMate.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		59AFC83FE23C187146AD1EC5 /* FreshCart.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = FreshCart.app; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
@@ -59,7 +59,7 @@
 		474F21E53ED07C986282756E /* Products */ = {
 			isa = PBXGroup;
 			children = (
-				59AFC83FE23C187146AD1EC5 /* LabelMate.app */,
+				59AFC83FE23C187146AD1EC5 /* FreshCart.app */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -87,7 +87,7 @@
 			packageProductDependencies = (
 			);
 			productName = iosApp;
-			productReference = 59AFC83FE23C187146AD1EC5 /* LabelMate.app */;
+			productReference = 59AFC83FE23C187146AD1EC5 /* FreshCart.app */;
 			productType = "com.apple.product-type.application";
 		};
 /* End PBXNativeTarget section */

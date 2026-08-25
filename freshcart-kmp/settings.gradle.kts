@@ -1,4 +1,4 @@
-rootProject.name = "LabelMateKmp"
+rootProject.name = "FreshCartKmp"
 enableFeaturePreview("TYPESAFE_PROJECT_ACCESSORS")
 
 pluginManagement {

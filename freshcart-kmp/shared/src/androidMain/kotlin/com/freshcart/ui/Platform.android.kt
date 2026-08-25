@@ -1,4 +1,4 @@
-package com.labelmate.ui
+package com.freshcart.ui
 
 import android.Manifest
 import android.content.pm.PackageManager
@@ -11,13 +11,13 @@ import androidx.core.content.ContextCompat
 import dev.printbeam.Transport
 
 @Composable
-actual fun rememberManualSaveAction(vm: AppViewModel): () -> Unit {
+actual fun rememberManualSaveAction(vm: SettingsViewModel): () -> Unit {
     val context = LocalContext.current
     val launcher = rememberLauncherForActivityResult(
         ActivityResultContracts.RequestPermission(),
     ) { granted -> if (granted) vm.commitManual() }
     return {
-        val needsBlePerm = vm.manualTransport == Transport.BLE &&
+        val needsBlePerm = vm.uiState.value.manualTransport == Transport.BLE &&
             Build.VERSION.SDK_INT >= Build.VERSION_CODES.S &&
             ContextCompat.checkSelfPermission(
                 context,

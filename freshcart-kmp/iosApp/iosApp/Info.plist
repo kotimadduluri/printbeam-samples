@@ -5,6 +5,6 @@
     <key>CADisableMinimumFrameDurationOnPhone</key>
     <true/>
     <key>NSLocalNetworkUsageDescription</key>
-    <string>LabelMate prints retail price labels to thermal printers on your local Wi-Fi network.</string>
+    <string>FreshCart prints order receipts to thermal printers on your local Wi-Fi network.</string>
 </dict>
 </plist>
