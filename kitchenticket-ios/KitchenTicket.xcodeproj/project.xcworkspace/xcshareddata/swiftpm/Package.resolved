@@ -1,0 +1,15 @@
+{
+  "originHash" : "eabbff1b493034186a6eda5b72a68cef834e2126bee965610cf81a734084f2a6",
+  "pins" : [
+    {
+      "identity" : "printbeam-sdk",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/kotimadduluri/printbeam-sdk",
+      "state" : {
+        "revision" : "ab6aa728e0063c30dc0babd6794f0da9c9d96368",
+        "version" : "0.1.0-alpha01"
+      }
+    }
+  ],
+  "version" : 3
+}
