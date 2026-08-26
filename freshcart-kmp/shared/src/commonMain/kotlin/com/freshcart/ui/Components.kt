@@ -5,7 +5,6 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -88,6 +87,17 @@ fun PrinterIcon(color: Color, modifier: Modifier = Modifier.size(24.dp)) {
     }
 }
 
+/** The disclosure chevron for tappable list rows. */
+@Composable
+fun ChevronIcon(color: Color, modifier: Modifier = Modifier.size(14.dp)) {
+    Canvas(modifier) {
+        val stroke = size.minDimension * 0.14f
+        val mid = Offset(size.width * 0.62f, size.height * 0.5f)
+        drawLine(color, Offset(size.width * 0.38f, size.height * 0.24f), mid, stroke, StrokeCap.Round)
+        drawLine(color, mid, Offset(size.width * 0.38f, size.height * 0.76f), stroke, StrokeCap.Round)
+    }
+}
+
 /** The solid accent circle used for connected/success confirmation moments. */
 @Composable
 fun CheckBadge(background: Color, tint: Color, size: Dp = 48.dp) {
@@ -100,23 +110,6 @@ fun CheckBadge(background: Color, tint: Color, size: Dp = 48.dp) {
             color = tint,
             fontWeight = FontWeight.Bold,
             fontSize = (size.value * 0.5f).sp,
-        )
-    }
-}
-
-@Composable
-fun EmptyBadge(glyph: String, size: Dp = 64.dp) {
-    Box(
-        modifier = Modifier
-            .size(size)
-            .clip(CircleShape)
-            .background(MaterialTheme.colorScheme.outline.copy(alpha = 0.18f)),
-        contentAlignment = Alignment.Center,
-    ) {
-        Text(
-            glyph,
-            style = MaterialTheme.typography.headlineMedium,
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
         )
     }
 }

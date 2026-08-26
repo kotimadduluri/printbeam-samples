@@ -39,13 +39,20 @@ actual fun rememberScanAction(vm: SettingsViewModel): () -> Unit {
         ActivityResultContracts.RequestMultiplePermissions(),
     ) {
         BluetoothPermissions.notifyChanged()
+        // Start regardless of the outcome — a denial degrades the scan to network-only
+        // (the SDK reports the BLE leg via onTransportFailed), it never blocks it.
         vm.startScan()
     }
     return {
-        if (BluetoothPermissions.allGranted(context)) {
-            vm.startScan()
-        } else {
+        // Only a scope that includes Bluetooth needs the runtime permissions; a WiFi-only
+        // scan must never prompt. The scope is read at invocation time, not composition
+        // time, so a scope change immediately before this call is honored.
+        val needsBlePerms = vm.uiState.value.scanScope.includesBluetooth &&
+            !BluetoothPermissions.allGranted(context)
+        if (needsBlePerms) {
             launcher.launch(BluetoothPermissions.required())
+        } else {
+            vm.startScan()
         }
     }
 }

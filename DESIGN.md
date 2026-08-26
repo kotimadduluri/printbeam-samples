@@ -76,16 +76,50 @@ change animates, screen transitions platform-default. **No decorative or looping
   - Failure → inline error card with the real message + Retry. Cart NOT cleared.
 - Empty cart: composed empty state with "Browse groceries" action.
 
-### 3. Printer settings
-Reuse each app's existing scan / manual-entry flow (this is the SDK-demo core). Restyle
-surfaces to the tokens above (white cards on `ground`, `accent` CTAs).
+### 3. Printer settings — ONE canonical flow (the iOS structure), all three apps
 
-Both transports are first-class in every app: the scan runs WiFi + BLE together, and a
-discovered printer of either kind can be picked and printed to. Android requests the SDK's
-`BluetoothPermissions` runtime set before scanning (denial degrades to network-only);
-iOS declares `NSBluetoothAlwaysUsageDescription` and `NSBonjourServices` so the system
-prompts fire instead of crashing/blocking. Manual entry: IP+port everywhere, BLE MAC on
-Android only (iOS BLE ids are scan-derived CoreBluetooth UUIDs — not typeable).
+The discovery UI is identical in structure and states everywhere; each platform expresses
+it with its native components (SwiftUI sheets / M3 bottom sheets + cards). No app invents
+its own variant.
+
+**Screen (nav title "Printer", back button):**
+- *Not configured* → **EmptyHero card**: large circular printer badge (muted on `ground`),
+  "No printer connected" (semibold 17), one-line guidance (muted 14, mentions WiFi and
+  Bluetooth), primary pill CTA **"Find Printer"** (magnifier icon), text button
+  "Enter IP address manually".
+- *Configured* → **ConnectedHero card**: `accent` check badge; eyebrow
+  "CONNECTED · WiFi|Bluetooth" (11 semibold, letter-spaced, `accent`); printer name (or
+  "Manual configuration"); endpoint subtitle (host : port, or BLE device id) in muted 14;
+  optional manufacturer chip (`accent` 12%-tint capsule). Below: two half-width pill
+  buttons — **Change** (accent-tinted) and **Disconnect** (red-tinted). Then the
+  **Paper width card** (title, one-line explainer, segmented 58/80 mm control).
+
+**Scan — a modal sheet** (iOS `.sheet`, Android/KMP M3 `ModalBottomSheet`), title
+"Scanning" / "Choose your printer", Close affordance:
+- Top of sheet: **scan-scope segmented control — All · WiFi · Bluetooth** (persisted in
+  the settings store as `scanScope`, default All). Changing it restarts the scan with the
+  matching SDK `transports` set. This is the user config for what kind of printer to find.
+- *Scanning*: large spinner, "Looking for printers…", guidance line (scope-aware: mention
+  WiFi and/or Bluetooth range to match the selected scope).
+- *Results*: list rows — 40pt circular accent-tinted printer badge · name (or endpoint if
+  nameless) · endpoint subtitle · optional manufacturer caption · trailing chevron. Tap =
+  save + dismiss. Header "Tap a printer to connect"; footer link "Don't see your printer?
+  Enter IP manually".
+- *Error* / *no results*: icon + title + message + "Try again" pill + "Enter manually"
+  text button (message mentions Bluetooth range only when scope includes Bluetooth).
+
+**Manual entry — a second sheet/dialog**, form-style: transport toggle (WiFi/Bluetooth on
+Android & KMP-Android; iOS is IP-only — BLE ids there are scan-derived CoreBluetooth UUIDs,
+not typeable), IP + port (or BLE MAC) fields with inline validation, Save/Cancel.
+
+**Permissions (scope-aware, all platforms):** BLE runtime permissions are requested only
+when the effective scan scope *includes* Bluetooth — a WiFi-only scan must never prompt.
+Android uses the SDK's `BluetoothPermissions` (`required()`/`allGranted()`, then
+`notifyChanged()` after the grant); denial degrades the scan to network-only, never blocks
+it. Manual-BLE save on Android still requests `BLUETOOTH_CONNECT`. iOS needs no permission
+code — `NSBluetoothAlwaysUsageDescription` + `NSBonjourServices` + 
+`NSLocalNetworkUsageDescription` in the Info.plist drive the system prompts on first use.
+Network scanning/printing needs no runtime permission anywhere.
 
 ## Catalog (identical in all three apps)
 

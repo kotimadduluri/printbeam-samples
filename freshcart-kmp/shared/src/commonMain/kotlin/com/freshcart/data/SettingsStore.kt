@@ -15,8 +15,28 @@ import dev.printbeam.Transport
 expect class SettingsStore {
     fun load(): PrinterSettings
     fun save(settings: PrinterSettings)
+    fun loadScanScope(): ScanScope
+    fun saveScanScope(scope: ScanScope)
     fun nextOrderNumber(): Int
     fun consumeOrderNumber(number: Int)
+}
+
+/**
+ * What kind of printer the discovery scan looks for — the user picks this in the scan sheet
+ * and it sticks across launches. Kept out of [PrinterSettings] on purpose: disconnecting a
+ * printer resets those, but the preferred scan scope should survive.
+ */
+enum class ScanScope {
+    ALL, WIFI, BLUETOOTH;
+
+    fun toTransports(): Set<Transport> = when (this) {
+        ALL -> setOf(Transport.NETWORK, Transport.BLE)
+        WIFI -> setOf(Transport.NETWORK)
+        BLUETOOTH -> setOf(Transport.BLE)
+    }
+
+    val includesBluetooth: Boolean get() = this != WIFI
+    val includesWifi: Boolean get() = this != BLUETOOTH
 }
 
 data class PrinterSettings(

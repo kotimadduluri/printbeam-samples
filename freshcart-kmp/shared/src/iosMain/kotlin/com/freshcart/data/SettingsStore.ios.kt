@@ -11,6 +11,7 @@ private const val KEY_BLE_DEVICE_ID = "freshcart.bleDeviceId"
 private const val KEY_PAPER_WIDTH = "freshcart.paperWidth"
 private const val KEY_PRINTER_NAME = "freshcart.printerName"
 private const val KEY_MANUFACTURER = "freshcart.manufacturer"
+private const val KEY_SCAN_SCOPE = "freshcart.scanScope"
 private const val KEY_LAST_ORDER_NUMBER = "freshcart.lastOrderNumber"
 
 actual class SettingsStore {
@@ -46,6 +47,14 @@ actual class SettingsStore {
         defaults.setObject(settings.paperWidth.name, KEY_PAPER_WIDTH)
         defaults.setObject(settings.printerName, KEY_PRINTER_NAME)
         defaults.setObject(settings.manufacturer, KEY_MANUFACTURER)
+    }
+
+    actual fun loadScanScope(): ScanScope = defaults.stringForKey(KEY_SCAN_SCOPE)
+        ?.let { runCatching { ScanScope.valueOf(it) }.getOrNull() }
+        ?: ScanScope.ALL
+
+    actual fun saveScanScope(scope: ScanScope) {
+        defaults.setObject(scope.name, KEY_SCAN_SCOPE)
     }
 
     // An unset integer reads as 0, which is exactly the "no orders yet" baseline we want.

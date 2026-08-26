@@ -21,6 +21,24 @@ enum TransportOption: String {
     case ble
 }
 
+/// What kinds of printer a scan should look for. Drives the segmented control at the top
+/// of the scan sheet; the mapping to SDK transports lives with the scanner so this store
+/// stays PrintBeam-free.
+enum ScanScopeOption: String, CaseIterable, Identifiable {
+    case all
+    case wifi
+    case ble
+
+    var id: String { rawValue }
+    var displayName: String {
+        switch self {
+        case .all: return "All"
+        case .wifi: return "WiFi"
+        case .ble: return "Bluetooth"
+        }
+    }
+}
+
 /// UserDefaults-backed settings. Single source of truth for printer endpoint and order
 /// numbering — both the order flow and the receipt printer read through it so changes
 /// in the Settings screen show up immediately on the next print.
@@ -32,6 +50,7 @@ final class Settings: ObservableObject {
         static let host = "printer.host"
         static let port = "printer.port"
         static let bleDeviceId = "printer.bleDeviceId"
+        static let scanScope = "printer.scanScope"
         static let paperWidth = "printer.paperWidth"
         static let printerName = "printer.name"
         static let manufacturer = "printer.manufacturer"
@@ -52,6 +71,9 @@ final class Settings: ObservableObject {
     @Published var bleDeviceId: String? {
         didSet { defaults.set(bleDeviceId, forKey: Keys.bleDeviceId) }
     }
+    @Published var scanScope: ScanScopeOption {
+        didSet { defaults.set(scanScope.rawValue, forKey: Keys.scanScope) }
+    }
     @Published var paperWidth: PaperWidthOption {
         didSet { defaults.set(paperWidth.rawValue, forKey: Keys.paperWidth) }
     }
@@ -66,6 +88,8 @@ final class Settings: ObservableObject {
         let storedTransport = defaults.string(forKey: Keys.transport) ?? TransportOption.network.rawValue
         self.transport = TransportOption(rawValue: storedTransport) ?? .network
         self.bleDeviceId = defaults.string(forKey: Keys.bleDeviceId)
+        let storedScope = defaults.string(forKey: Keys.scanScope) ?? ScanScopeOption.all.rawValue
+        self.scanScope = ScanScopeOption(rawValue: storedScope) ?? .all
         self.host = defaults.string(forKey: Keys.host) ?? "192.168.1.50"
         let storedPort = defaults.integer(forKey: Keys.port)
         self.port = storedPort == 0 ? 9100 : storedPort

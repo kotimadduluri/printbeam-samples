@@ -25,6 +25,18 @@ class SettingsRepository(context: Context) {
         manufacturer = prefs.getString(KEY_MANUFACTURER, null),
     )
 
+    /** Which transports the discovery scan covers. Persisted separately from the selected
+     *  printer — it's a preference about *finding* printers, not about the current one. */
+    fun loadScanScope(): ScanScope {
+        val raw = prefs.getString(KEY_SCAN_SCOPE, ScanScope.ALL.name)
+        return runCatching { ScanScope.valueOf(raw ?: ScanScope.ALL.name) }
+            .getOrDefault(ScanScope.ALL)
+    }
+
+    fun saveScanScope(scope: ScanScope) {
+        prefs.edit().putString(KEY_SCAN_SCOPE, scope.name).apply()
+    }
+
     fun save(settings: PrinterSettings) {
         prefs.edit()
             .putString(KEY_TRANSPORT, settings.transport.name)
@@ -56,10 +68,26 @@ class SettingsRepository(context: Context) {
         private const val KEY_PORT = "port"
         private const val KEY_BLE_DEVICE_ID = "ble_device_id"
         private const val KEY_PAPER_WIDTH = "paper_width"
+        private const val KEY_SCAN_SCOPE = "scan_scope"
         private const val KEY_PRINTER_NAME = "printer_name"
         private const val KEY_MANUFACTURER = "manufacturer"
         const val DEFAULT_PORT = 9100
     }
+}
+
+/**
+ * User-selectable scan scope: what kind of printer the discovery sheet looks for.
+ * Maps 1:1 onto the PrintBeam transports set passed to `PrintBeam.scan`.
+ */
+enum class ScanScope(val transports: Set<Transport>) {
+    ALL(setOf(Transport.NETWORK, Transport.BLE)),
+    WIFI(setOf(Transport.NETWORK)),
+    BLUETOOTH(setOf(Transport.BLE)),
+    ;
+
+    /** BLE runtime permissions are only worth asking for when this is true. */
+    val includesBluetooth: Boolean
+        get() = Transport.BLE in transports
 }
 
 data class PrinterSettings(

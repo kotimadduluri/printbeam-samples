@@ -3,6 +3,7 @@ package com.freshcart.ui
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.freshcart.data.PrinterSettings
+import com.freshcart.data.ScanScope
 import com.freshcart.data.SettingsStore
 import dev.printbeam.PaperWidth
 import dev.printbeam.PrinterEndpoint
@@ -19,11 +20,12 @@ import kotlinx.coroutines.launch
 
 data class SettingsUiState(
     val saved: PrinterSettings = PrinterSettings(),
+    val scanScope: ScanScope = ScanScope.ALL,
     val isScanning: Boolean = false,
     val scanResults: List<DiscoveredPrinter> = emptyList(),
     val scanError: String? = null,
-    val showScanDialog: Boolean = false,
-    val showManualDialog: Boolean = false,
+    val showScanSheet: Boolean = false,
+    val showManualSheet: Boolean = false,
     val manualTransport: Transport = Transport.NETWORK,
     val manualHost: String = "",
     val manualPort: String = "9100",
@@ -52,7 +54,9 @@ class SettingsViewModel(
 
     private var scanHandle: ScanHandle? = null
 
-    private val _uiState = MutableStateFlow(SettingsUiState(saved = settingsStore.load()))
+    private val _uiState = MutableStateFlow(
+        SettingsUiState(saved = settingsStore.load(), scanScope = settingsStore.loadScanScope()),
+    )
     val uiState: StateFlow<SettingsUiState> = _uiState
 
     fun onPaperWidthChange(value: PaperWidth) {
@@ -61,15 +65,28 @@ class SettingsViewModel(
 
     fun dismissSnackbar() = _uiState.update { it.copy(snackbarMessage = null) }
 
+    /**
+     * Persists the scan-scope choice. The caller (the sheet's segmented control) follows up
+     * with the platform scan action so the restart goes through the permission gate — the new
+     * scope may pull Bluetooth in, and only the UI layer can prompt for it.
+     */
+    fun onScanScopeChange(scope: ScanScope) {
+        if (_uiState.value.scanScope == scope) return
+        settingsStore.saveScanScope(scope)
+        _uiState.update { it.copy(scanScope = scope) }
+    }
+
     fun startScan() {
-        if (_uiState.value.isScanning) return
+        // No in-flight guard: changing the scan scope restarts the scan, and PrintBeam
+        // serializes scans anyway (a new scan cancels its predecessor).
+        scanHandle?.cancel()
         _uiState.update {
-            it.copy(isScanning = true, scanResults = emptyList(), scanError = null, showScanDialog = true)
+            it.copy(isScanning = true, scanResults = emptyList(), scanError = null, showScanSheet = true)
         }
-        // PrintBeam.scan streams: printers appear in the dialog as they respond. Callbacks
+        // PrintBeam.scan streams: printers appear in the sheet as they respond. Callbacks
         // arrive on the main dispatcher, so they can update UI state directly.
         scanHandle = PrintBeam.scan(
-            transports = setOf(Transport.NETWORK, Transport.BLE),
+            transports = _uiState.value.scanScope.toTransports(),
             listener = object : ScanListener {
                 override fun onPrinterFound(printer: DiscoveredPrinter) {
                     // Key by id — a later source can re-emit the same printer with richer
@@ -94,7 +111,7 @@ class SettingsViewModel(
         scanHandle?.cancel()
         scanHandle = null
         _uiState.update {
-            it.copy(isScanning = false, showScanDialog = false, scanResults = emptyList(), scanError = null)
+            it.copy(isScanning = false, showScanSheet = false, scanResults = emptyList(), scanError = null)
         }
     }
 
@@ -119,7 +136,7 @@ class SettingsViewModel(
         persist(saved)
         _uiState.update {
             it.copy(
-                showScanDialog = false,
+                showScanSheet = false,
                 scanResults = emptyList(),
                 scanError = null,
                 snackbarMessage = "Connected to ${printer.name ?: printer.endpoint.id}",
@@ -127,7 +144,7 @@ class SettingsViewModel(
         }
     }
 
-    fun openManualDialog() {
+    fun openManualSheet() {
         _uiState.update {
             it.copy(
                 manualTransport = it.saved.transport,
@@ -137,13 +154,13 @@ class SettingsViewModel(
                 manualHostError = null,
                 manualPortError = null,
                 manualBleError = null,
-                showManualDialog = true,
+                showManualSheet = true,
             )
         }
     }
 
-    fun dismissManualDialog() = _uiState.update {
-        it.copy(showManualDialog = false, manualHostError = null, manualPortError = null, manualBleError = null)
+    fun dismissManualSheet() = _uiState.update {
+        it.copy(showManualSheet = false, manualHostError = null, manualPortError = null, manualBleError = null)
     }
 
     fun onManualTransportChange(transport: Transport) = _uiState.update {
@@ -192,7 +209,7 @@ class SettingsViewModel(
                 manufacturer = null,
             ),
         )
-        _uiState.update { it.copy(showManualDialog = false) }
+        _uiState.update { it.copy(showManualSheet = false) }
         return true
     }
 
@@ -217,7 +234,7 @@ class SettingsViewModel(
                 manufacturer = null,
             ),
         )
-        _uiState.update { it.copy(showManualDialog = false) }
+        _uiState.update { it.copy(showManualSheet = false) }
         return true
     }
 

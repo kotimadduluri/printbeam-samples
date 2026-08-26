@@ -45,13 +45,13 @@ final class PrinterScanner: NSObject, ScanListener {
     private var byId: [String: DiscoveredPrinter] = [:]
     private var order: [String] = []
 
-    func start(timeoutSeconds: Int = 6) {
+    func start(transports: Set<Transport>, timeoutSeconds: Int = 6) {
         cancel()
         byId = [:]
         order = []
         do {
             handle = try PrintBeam.shared.scan(
-                transports: [Transport.network, Transport.ble],
+                transports: transports,
                 timeoutMs: Int64(timeoutSeconds) * 1000,
                 listener: self
             )
@@ -82,5 +82,17 @@ final class PrinterScanner: NSObject, ScanListener {
 
     func onFinished(printers: [DiscoveredPrinter]) {
         onDone?(printers)
+    }
+}
+
+/// The SDK transports a scan scope translates to. Lives here (not in Settings) so the
+/// settings store never imports PrintBeam types.
+extension ScanScopeOption {
+    var transports: Set<Transport> {
+        switch self {
+        case .all: return [Transport.network, Transport.ble]
+        case .wifi: return [Transport.network]
+        case .ble: return [Transport.ble]
+        }
     }
 }

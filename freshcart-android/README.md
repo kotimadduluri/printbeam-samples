@@ -27,7 +27,7 @@ dependencies {
 |---|---|---|
 | One-time init | [`FreshCartApp.kt`](app/src/main/java/com/freshcart/FreshCartApp.kt) | `PrintBeam.initialize(PrintBeamConfig(context = PrinterContext(this)))` in `Application.onCreate` — once per process, before any screen |
 | Print | [`PrintBeamReceiptPrinter.kt`](app/src/main/java/com/freshcart/printing/PrintBeamReceiptPrinter.kt) | `addManualPrinter(endpoint, name, paperWidth)` → stable id → `PrintBeam.print(id) { …receipt DSL… }`. Transport failures return `PrintResult.Failure`; only invalid receipt content throws. The connection is held between prints |
-| Streaming scan | [`SettingsViewModel.kt`](app/src/main/java/com/freshcart/ui/settings/SettingsViewModel.kt) | `PrintBeam.scan(transports, listener)` — results stream into the dialog as printers respond; rows keyed by `printer.id` because enrichment re-emits; `ScanHandle.cancel()` on dismiss and `onCleared` |
+| Streaming scan | [`SettingsViewModel.kt`](app/src/main/java/com/freshcart/ui/settings/SettingsViewModel.kt) | `PrintBeam.scan(transports, listener)` — results stream into the scan sheet as printers respond; rows keyed by `printer.id` because enrichment re-emits; `ScanHandle.cancel()` on dismiss and `onCleared` |
 | Disconnect | same file | Re-derive the held session's id via `addManualPrinter(oldEndpoint)`, then `PrintBeam.disconnect(id)` |
 
 The SDK is fenced behind a seam: ViewModels depend on the

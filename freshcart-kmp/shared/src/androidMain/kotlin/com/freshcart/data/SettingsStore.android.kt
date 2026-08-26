@@ -12,6 +12,7 @@ private const val KEY_BLE_DEVICE_ID = "ble_device_id"
 private const val KEY_PAPER_WIDTH = "paper_width"
 private const val KEY_PRINTER_NAME = "printer_name"
 private const val KEY_MANUFACTURER = "manufacturer"
+private const val KEY_SCAN_SCOPE = "scan_scope"
 private const val KEY_LAST_ORDER_NUMBER = "last_order_number"
 
 actual class SettingsStore(context: Context) {
@@ -44,6 +45,14 @@ actual class SettingsStore(context: Context) {
             .putString(KEY_PRINTER_NAME, settings.printerName)
             .putString(KEY_MANUFACTURER, settings.manufacturer)
             .apply()
+    }
+
+    actual fun loadScanScope(): ScanScope = prefs.getString(KEY_SCAN_SCOPE, null)
+        ?.let { runCatching { ScanScope.valueOf(it) }.getOrNull() }
+        ?: ScanScope.ALL
+
+    actual fun saveScanScope(scope: ScanScope) {
+        prefs.edit().putString(KEY_SCAN_SCOPE, scope.name).apply()
     }
 
     actual fun nextOrderNumber(): Int = prefs.getInt(KEY_LAST_ORDER_NUMBER, 0) + 1

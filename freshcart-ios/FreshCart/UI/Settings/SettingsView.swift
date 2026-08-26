@@ -43,9 +43,11 @@ struct SettingsView: View {
         .toolbarBackground(Color.fcGround, for: .navigationBar)
         .sheet(isPresented: $showScanSheet) {
             ScanResultsSheet(
+                scope: $settings.scanScope,
                 scanning: scanning,
                 results: scanResults,
                 error: scanError,
+                onScopeChange: { startScan() },
                 onPick: { picked in
                     if let net = picked.endpoint as? PrinterEndpoint.Network {
                         settings.saveSelectedPrinter(
@@ -108,7 +110,7 @@ struct SettingsView: View {
             scanResults = found
             scanning = false
         }
-        scanner.start()
+        scanner.start(transports: settings.scanScope.transports)
     }
 }
 
@@ -278,78 +280,107 @@ private struct PaperWidthSection: View {
 // MARK: - Scan sheet
 
 private struct ScanResultsSheet: View {
+    @Binding var scope: ScanScopeOption
     let scanning: Bool
     let results: [DiscoveredPrinter]
     let error: String?
+    let onScopeChange: () -> Void
     let onPick: (DiscoveredPrinter) -> Void
     let onRetry: () -> Void
     let onManual: () -> Void
     let onDismiss: () -> Void
 
+    /// Guidance tail shared by the scanning and no-results copy — mentions only the
+    /// connectivity the selected scope actually searches.
+    private var reachabilityHint: String {
+        switch scope {
+        case .all: return "either connected to the same WiFi network as this device or in Bluetooth range"
+        case .wifi: return "connected to the same WiFi network as this device"
+        case .ble: return "within Bluetooth range of this device"
+        }
+    }
+
     var body: some View {
         NavigationStack {
-            Group {
-                if scanning {
-                    VStack(spacing: 16) {
-                        ProgressView()
-                            .controlSize(.large)
-                        Text("Looking for printers…")
-                            .font(.headline)
-                        Text("Make sure your printer is on and either connected to the same WiFi as this device or in Bluetooth range.")
-                            .font(.subheadline)
-                            .foregroundStyle(Color.fcMuted)
-                            .multilineTextAlignment(.center)
-                            .padding(.horizontal)
-                    }
-                    .frame(maxWidth: .infinity, maxHeight: .infinity)
-                } else if let error = error {
-                    EmptyState(
-                        systemImage: "exclamationmark.triangle.fill",
-                        tint: .orange,
-                        title: "Something went wrong",
-                        message: error,
-                        primaryButtonTitle: "Try again",
-                        onPrimary: onRetry,
-                        secondaryButtonTitle: "Enter manually",
-                        onSecondary: onManual
-                    )
-                } else if results.isEmpty {
-                    EmptyState(
-                        systemImage: "wifi.exclamationmark",
-                        tint: Color.fcMuted,
-                        title: "No printers responded",
-                        message: "Check that your printer is powered on and either connected to the same WiFi network as this device or in Bluetooth range.",
-                        primaryButtonTitle: "Try again",
-                        onPrimary: onRetry,
-                        secondaryButtonTitle: "Enter manually",
-                        onSecondary: onManual
-                    )
-                } else {
-                    List {
-                        Section {
-                            ForEach(results, id: \.id) { p in
-                                Button { onPick(p) } label: {
-                                    DiscoveredRow(printer: p)
-                                }
-                                .buttonStyle(.plain)
-                            }
-                        } header: {
-                            Text("Tap a printer to connect")
-                                .textCase(nil)
-                        } footer: {
-                            Button("Don't see your printer? Enter IP manually", action: onManual)
-                                .font(.subheadline)
-                                .foregroundStyle(Color.fcAccent)
-                                .padding(.vertical, 4)
-                        }
+            VStack(spacing: 0) {
+                Picker("Scan scope", selection: $scope) {
+                    ForEach(ScanScopeOption.allCases) { option in
+                        Text(option.displayName).tag(option)
                     }
                 }
+                .pickerStyle(.segmented)
+                .padding(.horizontal, 16)
+                .padding(.top, 12)
+                .onChange(of: scope) { onScopeChange() }
+
+                content
             }
             .navigationTitle(scanning ? "Scanning" : "Choose your printer")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .topBarTrailing) {
                     Button("Close", action: onDismiss)
+                }
+            }
+        }
+    }
+
+    @ViewBuilder
+    private var content: some View {
+        Group {
+            if scanning {
+                VStack(spacing: 16) {
+                    ProgressView()
+                        .controlSize(.large)
+                    Text("Looking for printers…")
+                        .font(.headline)
+                    Text("Make sure your printer is on and \(reachabilityHint).")
+                        .font(.subheadline)
+                        .foregroundStyle(Color.fcMuted)
+                        .multilineTextAlignment(.center)
+                        .padding(.horizontal)
+                }
+                .frame(maxWidth: .infinity, maxHeight: .infinity)
+            } else if let error = error {
+                EmptyState(
+                    systemImage: "exclamationmark.triangle.fill",
+                    tint: .orange,
+                    title: "Something went wrong",
+                    message: error,
+                    primaryButtonTitle: "Try again",
+                    onPrimary: onRetry,
+                    secondaryButtonTitle: "Enter manually",
+                    onSecondary: onManual
+                )
+            } else if results.isEmpty {
+                EmptyState(
+                    systemImage: scope == .ble ? "antenna.radiowaves.left.and.right" : "wifi.exclamationmark",
+                    tint: Color.fcMuted,
+                    title: "No printers responded",
+                    message: "Check that your printer is powered on and \(reachabilityHint).",
+                    primaryButtonTitle: "Try again",
+                    onPrimary: onRetry,
+                    secondaryButtonTitle: "Enter manually",
+                    onSecondary: onManual
+                )
+            } else {
+                List {
+                    Section {
+                        ForEach(results, id: \.id) { p in
+                            Button { onPick(p) } label: {
+                                DiscoveredRow(printer: p)
+                            }
+                            .buttonStyle(.plain)
+                        }
+                    } header: {
+                        Text("Tap a printer to connect")
+                            .textCase(nil)
+                    } footer: {
+                        Button("Don't see your printer? Enter IP manually", action: onManual)
+                            .font(.subheadline)
+                            .foregroundStyle(Color.fcAccent)
+                            .padding(.vertical, 4)
+                    }
                 }
             }
         }

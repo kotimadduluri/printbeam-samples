@@ -4,6 +4,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
 import com.freshcart.data.PrinterSettings
+import com.freshcart.data.ScanScope
 import com.freshcart.data.SettingsRepository
 import dev.printbeam.PaperWidth
 import dev.printbeam.PrinterEndpoint
@@ -26,11 +27,12 @@ data class SettingsUiState(
     val paperWidth: PaperWidth = PaperWidth.MM_80,
     val printerName: String? = null,
     val manufacturer: String? = null,
+    val scanScope: ScanScope = ScanScope.ALL,
     val scanning: Boolean = false,
     val scanResults: List<DiscoveredPrinter> = emptyList(),
     val scanError: String? = null,
-    val showScanDialog: Boolean = false,
-    val showManualDialog: Boolean = false,
+    val showScanSheet: Boolean = false,
+    val showManualSheet: Boolean = false,
     val manualTransport: Transport = Transport.NETWORK,
     val manualHost: String = "",
     val manualPort: String = "9100",
@@ -66,6 +68,7 @@ class SettingsViewModel(
                 paperWidth = loaded.paperWidth,
                 printerName = loaded.printerName,
                 manufacturer = loaded.manufacturer,
+                scanScope = repo.loadScanScope(),
             ),
         )
         state = _state.asStateFlow()
@@ -77,19 +80,29 @@ class SettingsViewModel(
         persist()
     }
 
+    fun onScanScopeChange(scope: ScanScope) {
+        if (_state.value.scanScope == scope) return
+        _state.value = _state.value.copy(scanScope = scope)
+        repo.saveScanScope(scope)
+        // The caller (SettingsScreen) restarts the scan through its permission gate, so a
+        // scope that newly includes Bluetooth can prompt before the BLE leg starts.
+    }
+
     fun startScan() {
-        if (_state.value.scanning) return
+        // Restart-friendly: changing the scan scope mid-scan calls this again. Cancel our
+        // handle so the old listener stops mutating state; PrintBeam serializes the rest.
+        scanHandle?.cancel()
         _state.value = _state.value.copy(
             scanning = true,
             scanResults = emptyList(),
             scanError = null,
-            showScanDialog = true,
+            showScanSheet = true,
         )
-        // PrintBeam.scan streams: printers appear in the dialog as they respond instead of
+        // PrintBeam.scan streams: printers appear in the sheet as they respond instead of
         // all at once when the window closes. Callbacks arrive on the main dispatcher, so
         // they can touch UI state directly.
         scanHandle = PrintBeam.scan(
-            transports = setOf(Transport.NETWORK, Transport.BLE),
+            transports = _state.value.scanScope.transports,
             listener = object : ScanListener {
                 override fun onPrinterFound(printer: DiscoveredPrinter) {
                     // Key by id — a later source can re-emit the same printer with richer
@@ -119,7 +132,7 @@ class SettingsViewModel(
         scanHandle = null
         _state.value = _state.value.copy(
             scanning = false,
-            showScanDialog = false,
+            showScanSheet = false,
             scanResults = emptyList(),
             scanError = null,
         )
@@ -135,7 +148,7 @@ class SettingsViewModel(
                 bleDeviceId = null,
                 printerName = printer.name,
                 manufacturer = printer.manufacturer,
-                showScanDialog = false,
+                showScanSheet = false,
                 scanResults = emptyList(),
                 scanError = null,
             )
@@ -145,7 +158,7 @@ class SettingsViewModel(
                 host = "",
                 printerName = printer.name,
                 manufacturer = printer.manufacturer,
-                showScanDialog = false,
+                showScanSheet = false,
                 scanResults = emptyList(),
                 scanError = null,
             )
@@ -154,10 +167,10 @@ class SettingsViewModel(
         persist()
     }
 
-    fun openManualDialog() {
+    fun openManualSheet() {
         val s = _state.value
         _state.value = s.copy(
-            showManualDialog = true,
+            showManualSheet = true,
             manualTransport = s.transport,
             manualHost = s.host,
             manualPort = s.port.toString(),
@@ -168,9 +181,9 @@ class SettingsViewModel(
         )
     }
 
-    fun dismissManualDialog() {
+    fun dismissManualSheet() {
         _state.value = _state.value.copy(
-            showManualDialog = false,
+            showManualSheet = false,
             manualHostError = null,
             manualPortError = null,
             manualBleError = null,
@@ -234,7 +247,7 @@ class SettingsViewModel(
             bleDeviceId = null,
             printerName = null,
             manufacturer = null,
-            showManualDialog = false,
+            showManualSheet = false,
             manualHostError = null,
             manualPortError = null,
             manualBleError = null,
@@ -260,7 +273,7 @@ class SettingsViewModel(
             host = "",
             printerName = null,
             manufacturer = null,
-            showManualDialog = false,
+            showManualSheet = false,
             manualHostError = null,
             manualPortError = null,
             manualBleError = null,
