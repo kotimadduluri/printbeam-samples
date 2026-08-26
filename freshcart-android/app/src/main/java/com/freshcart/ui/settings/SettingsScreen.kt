@@ -78,6 +78,7 @@ import com.freshcart.ui.theme.FreshCartShapes
 import dev.printbeam.PaperWidth
 import dev.printbeam.PrinterEndpoint
 import dev.printbeam.Transport
+import dev.printbeam.permissions.BluetoothPermissions
 import dev.printbeam.discovery.DiscoveredPrinter
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -109,6 +110,24 @@ fun SettingsScreen(
             blePermLauncher.launch(Manifest.permission.BLUETOOTH_CONNECT)
         } else {
             viewModel.commitManual()
+        }
+    }
+
+    // Scanning covers BLE too, so it needs the full runtime set (SCAN+CONNECT on 12+,
+    // FINE_LOCATION before that). Denial isn't fatal: the scan still runs and finds
+    // network printers — only the BLE leg stays dark.
+    val scanPermLauncher = rememberLauncherForActivityResult(
+        ActivityResultContracts.RequestMultiplePermissions(),
+    ) {
+        BluetoothPermissions.notifyChanged()
+        viewModel.startScan()
+    }
+
+    fun tryScan() {
+        if (BluetoothPermissions.allGranted(context)) {
+            viewModel.startScan()
+        } else {
+            scanPermLauncher.launch(BluetoothPermissions.required())
         }
     }
 
@@ -144,7 +163,7 @@ fun SettingsScreen(
                     host = state.host,
                     port = state.port,
                     deviceId = state.bleDeviceId,
-                    onChange = viewModel::startScan,
+                    onChange = ::tryScan,
                     onDisconnect = viewModel::disconnect,
                 )
                 PaperWidthSection(
@@ -153,7 +172,7 @@ fun SettingsScreen(
                 )
             } else {
                 EmptyHero(
-                    onScan = viewModel::startScan,
+                    onScan = ::tryScan,
                     onManual = viewModel::openManualDialog,
                 )
             }
@@ -165,7 +184,7 @@ fun SettingsScreen(
                 results = state.scanResults,
                 error = state.scanError,
                 onPick = viewModel::pickDiscovered,
-                onRetry = viewModel::startScan,
+                onRetry = ::tryScan,
                 onManual = {
                     viewModel.dismissScan()
                     viewModel.openManualDialog()
@@ -332,7 +351,7 @@ private fun EmptyHero(
             )
             Spacer(Modifier.height(4.dp))
             Text(
-                "Find a printer on your WiFi network, or enter the address of a network or Bluetooth printer manually.",
+                "Scan for printers on your WiFi network or nearby over Bluetooth, or enter one manually.",
                 style = MaterialTheme.typography.bodyMedium,
                 color = FreshCartColors.Muted,
                 textAlign = TextAlign.Center,
@@ -436,7 +455,7 @@ private fun ScanDialog(
                     CircularProgressIndicator()
                     Spacer(Modifier.height(16.dp))
                     Text(
-                        "Make sure your printer is on and connected to the same WiFi.",
+                        "Make sure your printer is on and either connected to the same WiFi or in Bluetooth range.",
                         style = MaterialTheme.typography.bodyMedium,
                         textAlign = TextAlign.Center,
                         color = FreshCartColors.Muted,
@@ -450,7 +469,7 @@ private fun ScanDialog(
                 results.isEmpty() -> EmptyStateColumn(
                     icon = Icons.Outlined.SearchOff,
                     title = "No printers responded",
-                    subtitle = "Check that your printer is powered on and connected to the same WiFi network as this device.",
+                    subtitle = "Check that your printer is powered on and either connected to the same WiFi network as this device or in Bluetooth range.",
                 )
                 else -> LazyColumn(
                     modifier = Modifier.heightIn(max = 320.dp),

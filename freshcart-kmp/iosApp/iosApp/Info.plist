@@ -6,5 +6,13 @@
     <true/>
     <key>NSLocalNetworkUsageDescription</key>
     <string>FreshCart prints order receipts to thermal printers on your local Wi-Fi network.</string>
+    <key>NSBonjourServices</key>
+    <array>
+        <string>_pdl-datastream._tcp</string>
+        <string>_printer._tcp</string>
+        <string>_ipp._tcp</string>
+    </array>
+    <key>NSBluetoothAlwaysUsageDescription</key>
+    <string>FreshCart uses Bluetooth to find and print receipts on nearby Bluetooth thermal printers.</string>
 </dict>
 </plist>

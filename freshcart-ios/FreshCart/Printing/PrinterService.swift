@@ -51,7 +51,7 @@ final class PrinterScanner: NSObject, ScanListener {
         order = []
         do {
             handle = try PrintBeam.shared.scan(
-                transports: [Transport.network],
+                transports: [Transport.network, Transport.ble],
                 timeoutMs: Int64(timeoutSeconds) * 1000,
                 listener: self
             )

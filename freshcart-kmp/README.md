@@ -43,8 +43,10 @@ The point of the facade for KMP consumers: after the two one-line platform initi
 - **Cart** — quantity steppers, savings line, and a **Place Order** CTA that prints the
   receipt: printing / success / failure states, order numbers from a persisted counter
   (SharedPreferences / NSUserDefaults) consumed only on a successful print.
-- **Printer settings** — streaming WiFi scan with manual IP (and, on Android, BLE MAC)
-  fallback; paper width selection. Always reachable from the printer icon in the Shop top
+- **Printer settings** — streaming WiFi + Bluetooth scan with manual IP (and, on Android,
+  BLE MAC) fallback; paper width selection. Android gates the scan behind the SDK's
+  `BluetoothPermissions` runtime set via an expect/actual seam; iOS declares
+  `NSBluetoothAlwaysUsageDescription` + `NSBonjourServices` in `iosApp/iosApp/Info.plist`. Always reachable from the printer icon in the Shop top
   bar; placing an order without a configured printer lands here too.
 
 All screens, ViewModels, theme, and printing logic are `commonMain` Compose Multiplatform;

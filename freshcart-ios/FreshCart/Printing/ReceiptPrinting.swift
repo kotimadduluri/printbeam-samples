@@ -24,7 +24,19 @@ struct PrintBeamReceiptPrinter: ReceiptPrinting {
 
     func printReceipt(items: [CartItem], orderNumber: Int) async throws {
         let settings = Settings.shared
-        let endpoint = PrinterEndpoint.Network(host: settings.host, port: Int32(settings.port))
+        let endpoint: PrinterEndpoint
+        switch settings.transport {
+        case .network:
+            endpoint = PrinterEndpoint.Network(host: settings.host, port: Int32(settings.port))
+        case .ble:
+            // Kotlin's default profile argument doesn't bridge to Swift — pass NORDIC_UART
+            // explicitly, matching the Kotlin-side default. The SDK still auto-detects the
+            // writable characteristic at connect time if the printer uses different UUIDs.
+            endpoint = PrinterEndpoint.Ble(
+                deviceId: settings.bleDeviceId ?? "",
+                profile: BleProfile.companion.NORDIC_UART
+            )
+        }
         let paper: PaperWidth
         switch settings.paperWidth {
         case .mm58: paper = PaperWidth.mm58

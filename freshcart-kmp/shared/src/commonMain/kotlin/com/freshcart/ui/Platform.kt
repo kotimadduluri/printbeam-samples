@@ -12,3 +12,15 @@ import androidx.compose.runtime.Composable
  */
 @Composable
 expect fun rememberManualSaveAction(vm: SettingsViewModel): () -> Unit
+
+/**
+ * Returns the action to invoke when the user starts a printer scan.
+ *
+ * Android gates [SettingsViewModel.startScan] behind the SDK's [BluetoothPermissions] runtime
+ * set (SCAN+CONNECT on 12+, FINE_LOCATION before) — without it the BLE leg of the hybrid scan
+ * silently finds nothing. Denial still starts the scan: network discovery needs no runtime
+ * permission. iOS delegates straight through; the OS raises its Bluetooth / Local Network
+ * prompts on first use, driven by the Info.plist usage strings.
+ */
+@Composable
+expect fun rememberScanAction(vm: SettingsViewModel): () -> Unit

@@ -69,7 +69,7 @@ class SettingsViewModel(
         // PrintBeam.scan streams: printers appear in the dialog as they respond. Callbacks
         // arrive on the main dispatcher, so they can update UI state directly.
         scanHandle = PrintBeam.scan(
-            transports = setOf(Transport.NETWORK),
+            transports = setOf(Transport.NETWORK, Transport.BLE),
             listener = object : ScanListener {
                 override fun onPrinterFound(printer: DiscoveredPrinter) {
                     // Key by id — a later source can re-emit the same printer with richer

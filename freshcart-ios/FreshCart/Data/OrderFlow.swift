@@ -25,7 +25,7 @@ final class OrderFlow {
 
     /// True when there's no saved printer endpoint — the CTA routes to Settings instead.
     var needsPrinterSetup: Bool {
-        Settings.shared.host.isEmpty
+        !Settings.shared.isConfigured
     }
 
     /// Prints the receipt and, on success, clears the cart. The order number is only

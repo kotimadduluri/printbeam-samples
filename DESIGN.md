@@ -78,7 +78,14 @@ change animates, screen transitions platform-default. **No decorative or looping
 
 ### 3. Printer settings
 Reuse each app's existing scan / manual-entry flow (this is the SDK-demo core). Restyle
-surfaces to the tokens above (white cards on `ground`, `accent` CTAs). No functional changes.
+surfaces to the tokens above (white cards on `ground`, `accent` CTAs).
+
+Both transports are first-class in every app: the scan runs WiFi + BLE together, and a
+discovered printer of either kind can be picked and printed to. Android requests the SDK's
+`BluetoothPermissions` runtime set before scanning (denial degrades to network-only);
+iOS declares `NSBluetoothAlwaysUsageDescription` and `NSBonjourServices` so the system
+prompts fire instead of crashing/blocking. Manual entry: IP+port everywhere, BLE MAC on
+Android only (iOS BLE ids are scan-derived CoreBluetooth UUIDs — not typeable).
 
 ## Catalog (identical in all three apps)
 

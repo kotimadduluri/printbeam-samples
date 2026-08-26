@@ -47,6 +47,20 @@ The one exception is the printer-settings flow, which handles `DiscoveredPrinter
 - A Swift class conforming to `ScanListener` must inherit **`NSObject`** (Kotlin interfaces
   surface as Obj-C protocols). Callbacks arrive on the **main thread**.
 - Sealed results are checked with casts: `if let failure = result as? PrintResult.Failure`.
+- Kotlin companion members are reached through the class: `BleProfile.companion.NORDIC_UART`.
+
+## Required Info.plist keys
+
+The scan covers both WiFi and BLE, and iOS gates both behind privacy prompts driven by
+[`Info.plist`](FreshCart/Info.plist):
+
+- `NSLocalNetworkUsageDescription` + `NSBonjourServices` (`_pdl-datastream._tcp`,
+  `_printer._tcp`, `_ipp._tcp`) — without the service list, iOS 14+ silently blocks the
+  mDNS browse.
+- `NSBluetoothAlwaysUsageDescription` — without it the app **crashes** the first time the
+  SDK creates its `CBCentralManager` for a BLE scan.
+
+The prompts appear on first scan; no permission code is needed on iOS.
 
 ## App structure
 

@@ -14,6 +14,13 @@ enum PaperWidthOption: String, CaseIterable, Identifiable {
     }
 }
 
+/// How the saved printer is reached. Mirrors PrintBeam's `Transport` without leaking the
+/// SDK type into views and stores.
+enum TransportOption: String {
+    case network
+    case ble
+}
+
 /// UserDefaults-backed settings. Single source of truth for printer endpoint and order
 /// numbering — both the order flow and the receipt printer read through it so changes
 /// in the Settings screen show up immediately on the next print.
@@ -21,8 +28,10 @@ final class Settings: ObservableObject {
     static let shared = Settings()
 
     private enum Keys {
+        static let transport = "printer.transport"
         static let host = "printer.host"
         static let port = "printer.port"
+        static let bleDeviceId = "printer.bleDeviceId"
         static let paperWidth = "printer.paperWidth"
         static let printerName = "printer.name"
         static let manufacturer = "printer.manufacturer"
@@ -31,11 +40,17 @@ final class Settings: ObservableObject {
 
     private let defaults = UserDefaults.standard
 
+    @Published var transport: TransportOption {
+        didSet { defaults.set(transport.rawValue, forKey: Keys.transport) }
+    }
     @Published var host: String {
         didSet { defaults.set(host, forKey: Keys.host) }
     }
     @Published var port: Int {
         didSet { defaults.set(port, forKey: Keys.port) }
+    }
+    @Published var bleDeviceId: String? {
+        didSet { defaults.set(bleDeviceId, forKey: Keys.bleDeviceId) }
     }
     @Published var paperWidth: PaperWidthOption {
         didSet { defaults.set(paperWidth.rawValue, forKey: Keys.paperWidth) }
@@ -48,6 +63,9 @@ final class Settings: ObservableObject {
     }
 
     private init() {
+        let storedTransport = defaults.string(forKey: Keys.transport) ?? TransportOption.network.rawValue
+        self.transport = TransportOption(rawValue: storedTransport) ?? .network
+        self.bleDeviceId = defaults.string(forKey: Keys.bleDeviceId)
         self.host = defaults.string(forKey: Keys.host) ?? "192.168.1.50"
         let storedPort = defaults.integer(forKey: Keys.port)
         self.port = storedPort == 0 ? 9100 : storedPort
@@ -57,12 +75,33 @@ final class Settings: ObservableObject {
         self.manufacturer = defaults.string(forKey: Keys.manufacturer)
     }
 
-    /// Persist a scan-picked printer in one shot — host/port/name/manufacturer are saved
-    /// atomically rather than via individual @Published didSet writes, so a partial update
-    /// can't leave the user with a stale name attached to a fresh host.
+    /// True when a printer endpoint is saved and printable — a host for network, a device
+    /// id for BLE. The order flow and the settings hero both key off this.
+    var isConfigured: Bool {
+        switch transport {
+        case .network: return !host.isEmpty
+        case .ble: return !(bleDeviceId ?? "").isEmpty
+        }
+    }
+
+    /// Persist a scan-picked network printer in one shot — every field is saved together
+    /// rather than via individual @Published didSet writes, so a partial update can't
+    /// leave the user with a stale name attached to a fresh host.
     func saveSelectedPrinter(host: String, port: Int, name: String?, manufacturer: String?) {
+        self.transport = .network
         self.host = host
         self.port = port
+        self.bleDeviceId = nil
+        self.printerName = name
+        self.manufacturer = manufacturer
+    }
+
+    /// Persist a scan-picked BLE printer. The device id is CoreBluetooth's per-device UUID —
+    /// only obtainable by scanning, which is why BLE has no manual-entry path on iOS.
+    func saveSelectedBlePrinter(deviceId: String, name: String?, manufacturer: String?) {
+        self.transport = .ble
+        self.bleDeviceId = deviceId
+        self.host = ""
         self.printerName = name
         self.manufacturer = manufacturer
     }
@@ -70,8 +109,10 @@ final class Settings: ObservableObject {
     /// Clear the saved selection. Host/port are reset to the defaults the user would see
     /// on a fresh install, and the scan-derived name is dropped.
     func clearSelectedPrinter() {
+        self.transport = .network
         self.host = ""
         self.port = 9100
+        self.bleDeviceId = nil
         self.printerName = nil
         self.manufacturer = nil
     }

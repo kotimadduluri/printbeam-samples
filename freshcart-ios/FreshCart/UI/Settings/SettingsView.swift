@@ -16,17 +16,19 @@ struct SettingsView: View {
     var body: some View {
         ScrollView {
             VStack(spacing: 16) {
-                if settings.host.isEmpty {
+                if !settings.isConfigured {
                     EmptyHero(
                         onScan: { startScan() },
                         onManual: { showManualSheet = true }
                     )
                 } else {
                     ConnectedHero(
+                        transport: settings.transport,
                         name: settings.printerName,
                         manufacturer: settings.manufacturer,
                         host: settings.host,
                         port: settings.port,
+                        bleDeviceId: settings.bleDeviceId,
                         onChange: { startScan() },
                         onDisconnect: { settings.clearSelectedPrinter() }
                     )
@@ -49,6 +51,12 @@ struct SettingsView: View {
                         settings.saveSelectedPrinter(
                             host: net.host,
                             port: Int(net.port),
+                            name: picked.name,
+                            manufacturer: picked.manufacturer
+                        )
+                    } else if let ble = picked.endpoint as? PrinterEndpoint.Ble {
+                        settings.saveSelectedBlePrinter(
+                            deviceId: ble.deviceId,
                             name: picked.name,
                             manufacturer: picked.manufacturer
                         )
@@ -107,26 +115,42 @@ struct SettingsView: View {
 // MARK: - Hero cards
 
 private struct ConnectedHero: View {
+    let transport: TransportOption
     let name: String?
     let manufacturer: String?
     let host: String
     let port: Int
+    let bleDeviceId: String?
     let onChange: () -> Void
     let onDisconnect: () -> Void
+
+    private var transportLabel: String {
+        switch transport {
+        case .network: return "WiFi"
+        case .ble: return "Bluetooth"
+        }
+    }
+
+    private var endpointSubtitle: String {
+        switch transport {
+        case .network: return "\(host) : \(port)"
+        case .ble: return bleDeviceId ?? "-"
+        }
+    }
 
     var body: some View {
         VStack(alignment: .leading, spacing: 16) {
             HStack(alignment: .top, spacing: 12) {
                 StatusBadge(systemName: "checkmark.circle.fill", tint: Color.fcOnAccent, background: Color.fcAccent)
                 VStack(alignment: .leading, spacing: 2) {
-                    Text("CONNECTED")
+                    Text("CONNECTED · \(transportLabel)")
                         .font(.system(size: 11, weight: .semibold))
                         .kerning(0.5)
                         .foregroundStyle(Color.fcAccent)
                     Text(name ?? "Manual configuration")
                         .font(.system(size: 17, weight: .semibold))
                         .foregroundStyle(Color.fcInk)
-                    Text("\(host) : \(port)")
+                    Text(endpointSubtitle)
                         .font(.system(size: 14))
                         .foregroundStyle(Color.fcMuted)
                     if let manufacturer = manufacturer {
@@ -184,7 +208,7 @@ private struct EmptyHero: View {
                 Text("No printer connected")
                     .font(.system(size: 17, weight: .semibold))
                     .foregroundStyle(Color.fcInk)
-                Text("Find a printer on your WiFi network to start printing receipts.")
+                Text("Scan for printers on your WiFi network or nearby over Bluetooth to start printing receipts.")
                     .font(.system(size: 14))
                     .foregroundStyle(Color.fcMuted)
                     .multilineTextAlignment(.center)
@@ -271,7 +295,7 @@ private struct ScanResultsSheet: View {
                             .controlSize(.large)
                         Text("Looking for printers…")
                             .font(.headline)
-                        Text("Make sure your printer is on and connected to the same WiFi as this device.")
+                        Text("Make sure your printer is on and either connected to the same WiFi as this device or in Bluetooth range.")
                             .font(.subheadline)
                             .foregroundStyle(Color.fcMuted)
                             .multilineTextAlignment(.center)
@@ -294,7 +318,7 @@ private struct ScanResultsSheet: View {
                         systemImage: "wifi.exclamationmark",
                         tint: Color.fcMuted,
                         title: "No printers responded",
-                        message: "Check that your printer is powered on and connected to the same WiFi network as this device.",
+                        message: "Check that your printer is powered on and either connected to the same WiFi network as this device or in Bluetooth range.",
                         primaryButtonTitle: "Try again",
                         onPrimary: onRetry,
                         secondaryButtonTitle: "Enter manually",

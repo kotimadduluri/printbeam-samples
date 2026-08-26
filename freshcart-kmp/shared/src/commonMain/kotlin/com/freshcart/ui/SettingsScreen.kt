@@ -60,6 +60,7 @@ import dev.printbeam.discovery.DiscoveredPrinter
 fun SettingsScreen(vm: SettingsViewModel, onBack: () -> Unit) {
     val state by vm.uiState.collectAsState()
     val saveManual = rememberManualSaveAction(vm)
+    val startScan = rememberScanAction(vm)
     val snackbarHostState = remember { SnackbarHostState() }
 
     LaunchedEffect(state.snackbarMessage) {
@@ -107,7 +108,7 @@ fun SettingsScreen(vm: SettingsViewModel, onBack: () -> Unit) {
                     host = state.saved.host,
                     port = state.saved.port,
                     deviceId = state.saved.bleDeviceId,
-                    onChange = vm::startScan,
+                    onChange = startScan,
                     onDisconnect = vm::disconnect,
                 )
                 PaperWidthSection(
@@ -117,7 +118,7 @@ fun SettingsScreen(vm: SettingsViewModel, onBack: () -> Unit) {
             } else {
                 EmptyHero(
                     supportsBleManual = vm.supportsBleManual,
-                    onScan = vm::startScan,
+                    onScan = startScan,
                     onManual = vm::openManualDialog,
                 )
             }
@@ -129,7 +130,7 @@ fun SettingsScreen(vm: SettingsViewModel, onBack: () -> Unit) {
                 results = state.scanResults,
                 error = state.scanError,
                 onPick = vm::pickDiscovered,
-                onRetry = vm::startScan,
+                onRetry = startScan,
                 onManual = {
                     vm.dismissScan()
                     vm.openManualDialog()
@@ -263,9 +264,9 @@ private fun EmptyHero(
             Spacer(Modifier.height(4.dp))
             Text(
                 if (supportsBleManual)
-                    "Find a printer on your WiFi network, or enter the address of a network or Bluetooth printer manually."
+                    "Scan for printers on your WiFi network or nearby over Bluetooth, or enter one manually."
                 else
-                    "Find a printer on your WiFi network, or enter its IP address manually.",
+                    "Scan for printers on your WiFi network or nearby over Bluetooth, or enter an IP address manually.",
                 style = MaterialTheme.typography.bodyMedium,
                 color = FreshTokens.Muted,
                 textAlign = TextAlign.Center,
@@ -362,7 +363,7 @@ private fun ScanDialog(
                     CircularProgressIndicator(color = FreshTokens.Accent)
                     Spacer(Modifier.height(16.dp))
                     Text(
-                        "Make sure your printer is on and connected to the same WiFi.",
+                        "Make sure your printer is on and either connected to the same WiFi or in Bluetooth range.",
                         style = MaterialTheme.typography.bodyMedium,
                         textAlign = TextAlign.Center,
                         color = FreshTokens.Muted,
@@ -374,7 +375,7 @@ private fun ScanDialog(
                 )
                 results.isEmpty() -> EmptyStateColumn(
                     title = "No printers responded",
-                    subtitle = "Check that your printer is powered on and connected to the same WiFi network as this device.",
+                    subtitle = "Check that your printer is powered on and either connected to the same WiFi network as this device or in Bluetooth range.",
                 )
                 else -> LazyColumn(
                     modifier = Modifier.heightIn(max = 320.dp),
