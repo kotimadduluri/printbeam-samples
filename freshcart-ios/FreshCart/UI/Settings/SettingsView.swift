@@ -149,7 +149,7 @@ private struct ConnectedHero: View {
                         .font(.system(size: 11, weight: .semibold))
                         .kerning(0.5)
                         .foregroundStyle(Color.fcAccent)
-                    Text(name ?? "Manual configuration")
+                    Text(name ?? "\(transportLabel) printer")
                         .font(.system(size: 17, weight: .semibold))
                         .foregroundStyle(Color.fcInk)
                     Text(endpointSubtitle)

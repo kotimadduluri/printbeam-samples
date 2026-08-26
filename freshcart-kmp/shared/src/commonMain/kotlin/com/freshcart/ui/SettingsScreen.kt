@@ -217,7 +217,7 @@ private fun ConnectedHero(
                     )
                     Spacer(Modifier.height(2.dp))
                     Text(
-                        name ?: "Manual configuration",
+                        name ?: "$transportLabel printer",
                         fontSize = 17.sp,
                         fontWeight = FontWeight.SemiBold,
                         color = FreshTokens.Ink,
