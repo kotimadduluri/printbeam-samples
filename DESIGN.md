@@ -95,7 +95,11 @@ its own variant.
   **Paper width card** (title, one-line explainer, segmented 58/80 mm control).
 
 **Scan — a modal sheet** (iOS `.sheet`, Android/KMP M3 `ModalBottomSheet`), title
-"Scanning" / "Choose your printer", Close affordance:
+"Scanning" / "Choose your printer". Dismissal is platform-native: iOS keeps its Close
+button (sheet convention); Android/KMP sheets are **full height, no drag handle, no Close
+button** — swipe down (or back) dismisses, and extra chrome on top of that gesture is
+noise. The states region fills the remaining sheet height so spinner/empty states sit
+centered without the sheet jumping between states.
 - Top of sheet: **scan-scope segmented control — All · WiFi · Bluetooth** (persisted in
   the settings store as `scanScope`, default All). Changing it restarts the scan with the
   matching SDK `transports` set. This is the user config for what kind of printer to find.

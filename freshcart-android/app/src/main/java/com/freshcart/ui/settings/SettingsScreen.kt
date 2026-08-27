@@ -12,10 +12,10 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
@@ -485,26 +485,26 @@ private fun ScanSheet(
         animScope.launch { sheetState.hide() }.invokeOnCompletion { then() }
     }
 
+    // Full height, no drag handle, no Close button — a swipe down (or back) dismisses,
+    // which is the Material-native gesture; chrome on top of that is just noise.
     ModalBottomSheet(
         onDismissRequest = onDismiss,
         sheetState = sheetState,
         containerColor = FreshCartColors.Surface,
+        dragHandle = null,
     ) {
         Column(
             modifier = Modifier
                 .fillMaxWidth()
+                .fillMaxHeight()
                 .navigationBarsPadding()
-                .padding(start = 20.dp, end = 20.dp, bottom = 16.dp),
+                .padding(start = 20.dp, end = 20.dp, top = 20.dp, bottom = 16.dp),
         ) {
-            Row(verticalAlignment = Alignment.CenterVertically) {
-                Text(
-                    if (scanning && results.isEmpty()) "Scanning" else "Choose your printer",
-                    style = MaterialTheme.typography.titleLarge,
-                    fontWeight = FontWeight.Bold,
-                    modifier = Modifier.weight(1f),
-                )
-                TextButton(onClick = { close(onDismiss) }) { Text("Close") }
-            }
+            Text(
+                if (scanning && results.isEmpty()) "Scanning" else "Choose your printer",
+                style = MaterialTheme.typography.titleLarge,
+                fontWeight = FontWeight.Bold,
+            )
             Spacer(Modifier.height(8.dp))
 
             // What kind of printer to look for. Switching restarts the scan (through the
@@ -531,7 +531,9 @@ private fun ScanSheet(
             }
             Spacer(Modifier.height(16.dp))
 
-            Box(modifier = Modifier.heightIn(min = 260.dp)) {
+            // The states region takes all remaining sheet height, so spinner/empty states
+            // sit centered in a stable, full-height sheet instead of jumping around.
+            Box(modifier = Modifier.weight(1f)) {
                 when {
                     // Streamed results show as they arrive — even mid-scan, and even when
                     // one transport failed (a denied BLE leg must not hide WiFi finds).
@@ -614,7 +616,6 @@ private fun ScanResultsList(
         )
         Spacer(Modifier.height(8.dp))
         LazyColumn(
-            modifier = Modifier.heightIn(max = 380.dp),
             verticalArrangement = Arrangement.spacedBy(4.dp),
         ) {
             items(results, key = { it.id }) { p ->
@@ -747,13 +748,14 @@ private fun ManualEntrySheet(
         onDismissRequest = onDismiss,
         sheetState = sheetState,
         containerColor = FreshCartColors.Surface,
+        dragHandle = null,
     ) {
         Column(
             modifier = Modifier
                 .fillMaxWidth()
                 .navigationBarsPadding()
                 .imePadding()
-                .padding(start = 20.dp, end = 20.dp, bottom = 16.dp),
+                .padding(start = 20.dp, end = 20.dp, top = 20.dp, bottom = 16.dp),
             verticalArrangement = Arrangement.spacedBy(12.dp),
         ) {
             Text(

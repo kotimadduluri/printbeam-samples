@@ -8,9 +8,9 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
@@ -421,33 +421,33 @@ private fun ScanSheet(
     onManual: () -> Unit,
     onDismiss: () -> Unit,
 ) {
+    // Full height, no drag handle, no Close button — swipe down (or back) dismisses,
+    // which is the Material-native gesture; chrome on top of that is just noise.
     ModalBottomSheet(
         onDismissRequest = onDismiss,
         sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true),
         containerColor = FreshTokens.Surface,
+        dragHandle = null,
     ) {
         Column(
             modifier = Modifier
                 .fillMaxWidth()
+                .fillMaxHeight()
                 .navigationBarsPadding()
-                .padding(start = 20.dp, end = 20.dp, bottom = 16.dp),
+                .padding(start = 20.dp, end = 20.dp, top = 20.dp, bottom = 16.dp),
         ) {
-            Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth()) {
-                Text(
-                    if (scanning) "Scanning" else "Choose your printer",
-                    fontSize = 17.sp,
-                    fontWeight = FontWeight.SemiBold,
-                    color = FreshTokens.Ink,
-                    modifier = Modifier.weight(1f),
-                )
-                TextButton(onClick = onDismiss) { Text("Close", color = FreshTokens.Accent) }
-            }
+            Text(
+                if (scanning) "Scanning" else "Choose your printer",
+                fontSize = 17.sp,
+                fontWeight = FontWeight.SemiBold,
+                color = FreshTokens.Ink,
+            )
             Spacer(Modifier.height(4.dp))
             ScanScopeSelector(scope = scope, onScopeChange = onScopeChange)
             Spacer(Modifier.height(12.dp))
-            // One fixed-minimum region for all four states so the sheet doesn't jump around
-            // as the scan moves from spinner to list.
-            Box(modifier = Modifier.fillMaxWidth().heightIn(min = 280.dp)) {
+            // The states region takes all remaining sheet height, so spinner/empty states
+            // sit centered in a stable, full-height sheet instead of jumping around.
+            Box(modifier = Modifier.fillMaxWidth().weight(1f)) {
                 when {
                     scanning -> ScanningState(scope = scope)
                     error != null -> ScanEmptyState(
@@ -524,7 +524,7 @@ private fun ScanResultsList(
     onManual: () -> Unit,
 ) {
     LazyColumn(
-        modifier = Modifier.fillMaxWidth().heightIn(max = 420.dp),
+        modifier = Modifier.fillMaxWidth(),
         verticalArrangement = Arrangement.spacedBy(8.dp),
     ) {
         item(key = "header") {
@@ -675,13 +675,14 @@ private fun ManualSheet(
         onDismissRequest = onDismiss,
         sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true),
         containerColor = FreshTokens.Surface,
+        dragHandle = null,
     ) {
         Column(
             modifier = Modifier
                 .fillMaxWidth()
                 .navigationBarsPadding()
                 .imePadding()
-                .padding(start = 20.dp, end = 20.dp, bottom = 16.dp),
+                .padding(start = 20.dp, end = 20.dp, top = 20.dp, bottom = 16.dp),
             verticalArrangement = Arrangement.spacedBy(12.dp),
         ) {
             Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth()) {
