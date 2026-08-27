@@ -20,7 +20,7 @@ dependencyResolutionManagement {
 
 // shared/build.gradle.kts — commonMain; Gradle picks the right variant per target
 commonMain.dependencies {
-    api("dev.printbeam:printbeam:0.1.0-alpha01")
+    api("dev.printbeam:printbeam:0.1.0-alpha02")
 }
 ```
 
@@ -43,7 +43,9 @@ The point of the facade for KMP consumers: after the two one-line platform initi
 - **Cart** — quantity steppers, savings line, and a **Place Order** CTA that prints the
   receipt: printing / success / failure states, order numbers from a persisted counter
   (SharedPreferences / NSUserDefaults) consumed only on a successful print.
-- **Printer settings** — streaming scan in a bottom sheet with an All / Network / Bluetooth
+- **Printer settings** — printers that don't advertise mDNS are picked nameless and then
+  asked for their identity via `PrintBeam.queryDeviceInfo` (`resolveNameFromDevice` in the
+  shared `SettingsViewModel`); streaming scan in a bottom sheet with an All / Network / Bluetooth
   scope control (persisted), manual IP (and, on Android,
   BLE MAC) fallback; paper width selection. Android gates the scan behind the SDK's
   `BluetoothPermissions` runtime set via an expect/actual seam; iOS declares

@@ -17,7 +17,7 @@ dependencyResolutionManagement {
 
 // app/build.gradle.kts — Android-only projects use the -android artifact
 dependencies {
-    implementation("dev.printbeam:printbeam-android:0.1.0-alpha01")
+    implementation("dev.printbeam:printbeam-android:0.1.0-alpha02")
 }
 ```
 
@@ -28,6 +28,7 @@ dependencies {
 | One-time init | [`FreshCartApp.kt`](app/src/main/java/com/freshcart/FreshCartApp.kt) | `PrintBeam.initialize(PrintBeamConfig(context = PrinterContext(this)))` in `Application.onCreate` — once per process, before any screen |
 | Print | [`PrintBeamReceiptPrinter.kt`](app/src/main/java/com/freshcart/printing/PrintBeamReceiptPrinter.kt) | `addManualPrinter(endpoint, name, paperWidth)` → stable id → `PrintBeam.print(id) { …receipt DSL… }`. Transport failures return `PrintResult.Failure`; only invalid receipt content throws. The connection is held between prints |
 | Streaming scan | [`SettingsViewModel.kt`](app/src/main/java/com/freshcart/ui/settings/SettingsViewModel.kt) | `PrintBeam.scan(transports, listener)` — results stream into the scan sheet as printers respond; rows keyed by `printer.id` because enrichment re-emits; `ScanHandle.cancel()` on dismiss and `onCleared` |
+| Auto-naming | [`SettingsViewModel.kt`](app/src/main/java/com/freshcart/ui/settings/SettingsViewModel.kt) (`resolveNameFromDevice`) | `PrintBeam.queryDeviceInfo(id)` — printers that don't advertise mDNS are picked nameless, then asked for their `GS I` identity (manufacturer + model) over the held session |
 | Disconnect | same file | Re-derive the held session's id via `addManualPrinter(oldEndpoint)`, then `PrintBeam.disconnect(id)` |
 
 The SDK is fenced behind a seam: ViewModels depend on the

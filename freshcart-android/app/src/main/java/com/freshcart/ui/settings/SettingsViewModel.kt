@@ -165,6 +165,47 @@ class SettingsViewModel(
         }
         _state.value = newState
         persist()
+        resolveNameFromDevice()
+    }
+
+    /**
+     * Discovery couldn't name this printer (many network printers don't advertise mDNS at
+     * all) — so ask the printer itself: `queryDeviceInfo` reads ESC/POS `GS I` identity
+     * (manufacturer + model) over the facade's held session. Best-effort: printers that
+     * ignore `GS I` (typical for BLE) or a dropped link just keep the transport fallback
+     * label, and a name the scan DID provide is never overwritten.
+     */
+    private fun resolveNameFromDevice() {
+        val s = _state.value
+        if (s.printerName != null || !s.isConnected) return
+        val endpoint = when (s.transport) {
+            Transport.NETWORK -> PrinterEndpoint.Network(s.host, s.port)
+            Transport.BLE -> PrinterEndpoint.Ble(s.bleDeviceId.orEmpty())
+        }
+        viewModelScope.launch {
+            val info = try {
+                val id = PrintBeam.addManualPrinter(endpoint, null, s.paperWidth)
+                PrintBeam.queryDeviceInfo(id)
+            } catch (e: PrinterException) {
+                return@launch
+            }
+            val name = listOfNotNull(info.manufacturer, info.model)
+                .joinToString(" ")
+                .ifBlank { null } ?: return@launch
+            // Re-check against the latest state — the user may have picked a different
+            // printer while the query was in flight.
+            val current = _state.value
+            if (current.printerName != null || current.transport != s.transport ||
+                current.host != s.host || current.bleDeviceId != s.bleDeviceId
+            ) {
+                return@launch
+            }
+            _state.value = current.copy(
+                printerName = name,
+                manufacturer = info.manufacturer ?: current.manufacturer,
+            )
+            persist()
+        }
     }
 
     fun openManualSheet() {
@@ -253,6 +294,7 @@ class SettingsViewModel(
             manualBleError = null,
         )
         persist()
+        resolveNameFromDevice()
         return true
     }
 
@@ -279,6 +321,7 @@ class SettingsViewModel(
             manualBleError = null,
         )
         persist()
+        resolveNameFromDevice()
         return true
     }
 

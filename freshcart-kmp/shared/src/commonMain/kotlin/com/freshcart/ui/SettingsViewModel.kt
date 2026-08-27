@@ -134,12 +134,54 @@ class SettingsViewModel(
             )
         }
         persist(saved)
+        resolveNameFromDevice()
         _uiState.update {
             it.copy(
                 showScanSheet = false,
                 scanResults = emptyList(),
                 scanError = null,
                 snackbarMessage = "Connected to ${printer.name ?: printer.endpoint.id}",
+            )
+        }
+    }
+
+    /**
+     * Discovery couldn't name this printer (many network printers don't advertise mDNS at
+     * all) — so ask the printer itself: `queryDeviceInfo` reads ESC/POS `GS I` identity
+     * (manufacturer + model) over the facade's held session. Best-effort: printers that
+     * ignore `GS I` (typical for BLE) or a dropped link keep the transport fallback label,
+     * and a name the scan DID provide is never overwritten.
+     */
+    private fun resolveNameFromDevice() {
+        val saved = _uiState.value.saved
+        if (saved.printerName != null || !saved.isConfigured) return
+        val endpoint = when (saved.transport) {
+            Transport.NETWORK -> PrinterEndpoint.Network(host = saved.host, port = saved.port)
+            Transport.BLE -> PrinterEndpoint.Ble(deviceId = saved.bleDeviceId.orEmpty())
+        }
+        viewModelScope.launch {
+            val info = try {
+                val id = PrintBeam.addManualPrinter(endpoint, null, saved.paperWidth)
+                PrintBeam.queryDeviceInfo(id)
+            } catch (e: PrinterException) {
+                return@launch
+            }
+            val name = listOfNotNull(info.manufacturer, info.model)
+                .joinToString(" ")
+                .ifBlank { null } ?: return@launch
+            // Re-check against the latest state — the user may have switched printers
+            // while the query was in flight.
+            val current = _uiState.value.saved
+            if (current.printerName != null || current.transport != saved.transport ||
+                current.host != saved.host || current.bleDeviceId != saved.bleDeviceId
+            ) {
+                return@launch
+            }
+            persist(
+                current.copy(
+                    printerName = name,
+                    manufacturer = info.manufacturer ?: current.manufacturer,
+                ),
             )
         }
     }
@@ -210,6 +252,7 @@ class SettingsViewModel(
             ),
         )
         _uiState.update { it.copy(showManualSheet = false) }
+        resolveNameFromDevice()
         return true
     }
 
@@ -235,6 +278,7 @@ class SettingsViewModel(
             ),
         )
         _uiState.update { it.copy(showManualSheet = false) }
+        resolveNameFromDevice()
         return true
     }
 

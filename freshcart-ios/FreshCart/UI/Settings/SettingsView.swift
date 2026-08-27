@@ -63,6 +63,7 @@ struct SettingsView: View {
                             manufacturer: picked.manufacturer
                         )
                     }
+                    PrinterIdentity.resolveNameIfNeeded()
                     showScanSheet = false
                 },
                 onRetry: { startScan() },
@@ -89,6 +90,7 @@ struct SettingsView: View {
                         name: nil,
                         manufacturer: nil
                     )
+                    PrinterIdentity.resolveNameIfNeeded()
                     showManualSheet = false
                 },
                 onCancel: { showManualSheet = false }

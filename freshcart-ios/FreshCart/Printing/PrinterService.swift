@@ -96,3 +96,48 @@ extension ScanScopeOption {
         }
     }
 }
+
+/// Discovery couldn't name this printer (many network printers don't advertise mDNS at
+/// all) — so ask the printer itself: `queryDeviceInfo` reads ESC/POS `GS I` identity
+/// (manufacturer + model) over the facade's held session. Best-effort: printers that
+/// ignore `GS I` (typical for BLE) or a dropped link keep the transport fallback label,
+/// and a name the scan DID provide is never overwritten.
+enum PrinterIdentity {
+
+    static func resolveNameIfNeeded() {
+        let settings = Settings.shared
+        guard settings.isConfigured, settings.printerName == nil else { return }
+        let transport = settings.transport
+        let host = settings.host
+        let bleDeviceId = settings.bleDeviceId
+
+        let endpoint: PrinterEndpoint
+        switch transport {
+        case .network:
+            endpoint = PrinterEndpoint.Network(host: host, port: Int32(settings.port))
+        case .ble:
+            endpoint = PrinterEndpoint.Ble(
+                deviceId: bleDeviceId ?? "",
+                profile: BleProfile.companion.NORDIC_UART
+            )
+        }
+        let paper: PaperWidth = settings.paperWidth == .mm58 ? PaperWidth.mm58 : PaperWidth.mm80
+
+        Task {
+            guard let id = try? PrintBeam.shared.addManualPrinter(
+                endpoint: endpoint, name: nil, paperWidth: paper
+            ) else { return }
+            guard let info = try? await PrintBeam.shared.queryDeviceInfo(printerId: id) else { return }
+            let name = [info.manufacturer, info.model].compactMap { $0 }.joined(separator: " ")
+            guard !name.isEmpty else { return }
+            await MainActor.run {
+                // Re-check — the user may have switched printers while the query ran.
+                let current = Settings.shared
+                guard current.printerName == nil, current.transport == transport,
+                      current.host == host, current.bleDeviceId == bleDeviceId else { return }
+                current.printerName = name
+                if current.manufacturer == nil { current.manufacturer = info.manufacturer }
+            }
+        }
+    }
+}

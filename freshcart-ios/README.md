@@ -19,7 +19,7 @@ Xcode → File → **Add Package Dependencies…** →
 https://github.com/kotimadduluri/printbeam-sdk
 ```
 
-pinned to the exact version (`0.1.0-alpha01`). The package serves a prebuilt XCFramework
+pinned to the exact version (`0.1.0-alpha02`). The package serves a prebuilt XCFramework
 (arm64 device + arm64 simulator); nothing else to configure.
 
 ## Where PrintBeam is touched
@@ -29,6 +29,7 @@ pinned to the exact version (`0.1.0-alpha01`). The package serves a prebuilt XCF
 | One-time init | [`FreshCartApp.swift`](FreshCart/FreshCartApp.swift) → [`PrinterService.swift`](FreshCart/Printing/PrinterService.swift) | `PrintBeam.shared.initialize(config:)` from the `App` initializer |
 | Print | [`ReceiptPrinting.swift`](FreshCart/Printing/ReceiptPrinting.swift) | `try PrintBeam.shared.addManualPrinter(…)` → `try await PrintBeam.shared.print(printerId:block:)` — Kotlin suspend functions arrive as `async`; the receipt DSL closure gets the builder (`align`/`bold`/`text`/`line`/`divider`/`feed`/`cut`) |
 | Streaming scan | [`PrinterService.swift`](FreshCart/Printing/PrinterService.swift) (`PrinterScanner`) + [`SettingsView.swift`](FreshCart/UI/Settings/SettingsView.swift) | A Swift class conforming to the Kotlin `ScanListener` interface, streaming results into SwiftUI `@State` |
+| Auto-naming | [`PrinterService.swift`](FreshCart/Printing/PrinterService.swift) (`PrinterIdentity`) | `try await PrintBeam.shared.queryDeviceInfo(printerId:)` — printers that don't advertise mDNS are picked nameless, then asked for their `GS I` identity (manufacturer + model) over the held session |
 
 Everything above the `Printing/` folder stays SDK-free: screens and stores talk to the
 `ReceiptPrinting` protocol, and `PrintBeamReceiptPrinter` is the only implementation.
