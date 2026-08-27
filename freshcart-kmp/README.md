@@ -20,7 +20,7 @@ dependencyResolutionManagement {
 
 // shared/build.gradle.kts — commonMain; Gradle picks the right variant per target
 commonMain.dependencies {
-    api("dev.printbeam:printbeam:0.1.0-alpha02")
+    api("dev.printbeam:printbeam:0.1.0-alpha03")
 }
 ```
 

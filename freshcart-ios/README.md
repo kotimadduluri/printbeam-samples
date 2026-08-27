@@ -19,7 +19,7 @@ Xcode → File → **Add Package Dependencies…** →
 https://github.com/kotimadduluri/printbeam-sdk
 ```
 
-pinned to the exact version (`0.1.0-alpha02`). The package serves a prebuilt XCFramework
+pinned to the exact version (`0.1.0-alpha03`). The package serves a prebuilt XCFramework
 (arm64 device + arm64 simulator); nothing else to configure.
 
 ## Where PrintBeam is touched

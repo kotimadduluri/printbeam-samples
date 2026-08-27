@@ -350,7 +350,7 @@
 			repositoryURL = "https://github.com/kotimadduluri/printbeam-sdk";
 			requirement = {
 				kind = exactVersion;
-				version = "0.1.0-alpha02";
+				version = "0.1.0-alpha03";
 			};
 		};
 /* End XCRemoteSwiftPackageReference section */

@@ -17,7 +17,7 @@ dependencyResolutionManagement {
 
 // app/build.gradle.kts — Android-only projects use the -android artifact
 dependencies {
-    implementation("dev.printbeam:printbeam-android:0.1.0-alpha02")
+    implementation("dev.printbeam:printbeam-android:0.1.0-alpha03")
 }
 ```
 

@@ -130,6 +130,9 @@ enum PrinterIdentity {
             guard let info = try? await PrintBeam.shared.queryDeviceInfo(printerId: id) else { return }
             let name = [info.manufacturer, info.model].compactMap { $0 }.joined(separator: " ")
             guard !name.isEmpty else { return }
+            // Refresh the facade registry with the resolved name so a rescan in this
+            // session lists the printer named, not as a bare endpoint.
+            _ = try? PrintBeam.shared.addManualPrinter(endpoint: endpoint, name: name, paperWidth: paper)
             await MainActor.run {
                 // Re-check — the user may have switched printers while the query ran.
                 let current = Settings.shared

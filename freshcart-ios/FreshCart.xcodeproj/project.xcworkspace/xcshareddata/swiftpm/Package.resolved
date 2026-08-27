@@ -6,8 +6,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/kotimadduluri/printbeam-sdk",
       "state" : {
-        "revision" : "b23464c4ebbc5a6713b83dd1ecb3b551ebd227b9",
-        "version" : "0.1.0-alpha02"
+        "revision" : "84a698d9fbf66943aa58191540a3097dd9d16c31",
+        "version" : "0.1.0-alpha03"
       }
     }
   ],

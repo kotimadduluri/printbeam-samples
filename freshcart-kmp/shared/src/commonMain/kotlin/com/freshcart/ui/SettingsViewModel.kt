@@ -177,6 +177,9 @@ class SettingsViewModel(
             ) {
                 return@launch
             }
+            // Refresh the facade registry with the resolved name so a rescan in this
+            // session lists the printer named, not as a bare endpoint.
+            runCatching { PrintBeam.addManualPrinter(endpoint, name, saved.paperWidth) }
             persist(
                 current.copy(
                     printerName = name,
