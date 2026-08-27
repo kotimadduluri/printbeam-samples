@@ -18,7 +18,7 @@ expect fun rememberManualSaveAction(vm: SettingsViewModel): () -> Unit
  *
  * Android gates [SettingsViewModel.startScan] behind the SDK's BluetoothPermissions runtime
  * set (SCAN+CONNECT on 12+, FINE_LOCATION before), but only when the persisted scan scope
- * includes Bluetooth — a WiFi-only scan never prompts. Denial still starts the scan: network
+ * includes Bluetooth — a network-only scan never prompts. Denial still starts the scan: network
  * discovery needs no runtime permission. iOS delegates straight through; the OS raises its
  * Bluetooth / Local Network prompts on first use, driven by the Info.plist usage strings.
  */

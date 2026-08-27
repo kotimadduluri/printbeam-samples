@@ -194,7 +194,7 @@ private fun ConnectedHero(
         Transport.BLE -> deviceId ?: "-"
     }
     val transportLabel = when (transport) {
-        Transport.NETWORK -> "WiFi"
+        Transport.NETWORK -> "Network"
         Transport.BLE -> "Bluetooth"
     }
     Surface(
@@ -308,7 +308,7 @@ private fun EmptyHero(
             )
             Spacer(Modifier.height(4.dp))
             Text(
-                "Scan for printers on your WiFi network or nearby over Bluetooth to start printing receipts.",
+                "Scan for printers on your network or nearby over Bluetooth to start printing receipts.",
                 fontSize = 14.sp,
                 color = FreshTokens.Muted,
                 textAlign = TextAlign.Center,
@@ -477,7 +477,7 @@ private fun ScanSheet(
 private fun ScanScopeSelector(scope: ScanScope, onScopeChange: (ScanScope) -> Unit) {
     val entries = listOf(
         ScanScope.ALL to "All",
-        ScanScope.WIFI to "WiFi",
+        ScanScope.NETWORK to "Network",
         ScanScope.BLUETOOTH to "Bluetooth",
     )
     SingleChoiceSegmentedButtonRow(modifier = Modifier.fillMaxWidth()) {
@@ -635,18 +635,18 @@ private fun ScanEmptyState(
 
 private fun scanGuidance(scope: ScanScope): String = when (scope) {
     ScanScope.ALL ->
-        "Make sure your printer is on and either connected to the same WiFi as this device or in Bluetooth range."
-    ScanScope.WIFI ->
-        "Make sure your printer is on and connected to the same WiFi network as this device."
+        "Make sure your printer is on and either connected to the same network as this device or in Bluetooth range."
+    ScanScope.NETWORK ->
+        "Make sure your printer is on and connected to the same network as this device."
     ScanScope.BLUETOOTH ->
         "Make sure your printer is on and in Bluetooth range."
 }
 
 private fun noResultsMessage(scope: ScanScope): String = when (scope) {
     ScanScope.ALL ->
-        "Check that your printer is powered on and either connected to the same WiFi network as this device or in Bluetooth range."
-    ScanScope.WIFI ->
-        "Check that your printer is powered on and connected to the same WiFi network as this device."
+        "Check that your printer is powered on and either connected to the same network as this device or in Bluetooth range."
+    ScanScope.NETWORK ->
+        "Check that your printer is powered on and connected to the same network as this device."
     ScanScope.BLUETOOTH ->
         "Check that your printer is powered on and in Bluetooth range."
 }
@@ -707,7 +707,7 @@ private fun ManualSheet(
                         onClick = { onTransportChange(Transport.NETWORK) },
                         shape = SegmentedButtonDefaults.itemShape(index = 0, count = 2),
                         colors = segmentColors(),
-                    ) { Text("WiFi") }
+                    ) { Text("Network") }
                     SegmentedButton(
                         selected = transport == Transport.BLE,
                         onClick = { onTransportChange(Transport.BLE) },

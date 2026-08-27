@@ -44,7 +44,7 @@ actual fun rememberScanAction(vm: SettingsViewModel): () -> Unit {
         vm.startScan()
     }
     return {
-        // Only a scope that includes Bluetooth needs the runtime permissions; a WiFi-only
+        // Only a scope that includes Bluetooth needs the runtime permissions; a network-only
         // scan must never prompt. The scope is read at invocation time, not composition
         // time, so a scope change immediately before this call is honored.
         val needsBlePerms = vm.uiState.value.scanScope.includesBluetooth &&

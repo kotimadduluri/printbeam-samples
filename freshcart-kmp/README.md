@@ -43,7 +43,7 @@ The point of the facade for KMP consumers: after the two one-line platform initi
 - **Cart** — quantity steppers, savings line, and a **Place Order** CTA that prints the
   receipt: printing / success / failure states, order numbers from a persisted counter
   (SharedPreferences / NSUserDefaults) consumed only on a successful print.
-- **Printer settings** — streaming scan in a bottom sheet with an All / WiFi / Bluetooth
+- **Printer settings** — streaming scan in a bottom sheet with an All / Network / Bluetooth
   scope control (persisted), manual IP (and, on Android,
   BLE MAC) fallback; paper width selection. Android gates the scan behind the SDK's
   `BluetoothPermissions` runtime set via an expect/actual seam; iOS declares

@@ -51,7 +51,7 @@ The one exception is the printer-settings flow, which handles `DiscoveredPrinter
 
 ## Required Info.plist keys
 
-The scan covers both WiFi and BLE, and iOS gates both behind privacy prompts driven by
+The scan covers both network and BLE printers, and iOS gates both behind privacy prompts driven by
 [`Info.plist`](FreshCart/Info.plist):
 
 - `NSLocalNetworkUsageDescription` + `NSBonjourServices` (`_pdl-datastream._tcp`,

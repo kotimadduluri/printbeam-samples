@@ -26,14 +26,14 @@ enum TransportOption: String {
 /// stays PrintBeam-free.
 enum ScanScopeOption: String, CaseIterable, Identifiable {
     case all
-    case wifi
+    case network
     case ble
 
     var id: String { rawValue }
     var displayName: String {
         switch self {
         case .all: return "All"
-        case .wifi: return "WiFi"
+        case .network: return "Network"
         case .ble: return "Bluetooth"
         }
     }

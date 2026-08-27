@@ -46,6 +46,12 @@ consistent across all three apps.
 150–200 ms, purposeful only: add-button press feedback (scale ~0.96), cart badge count
 change animates, screen transitions platform-default. **No decorative or looping animation.**
 
+### Terminology
+
+TCP printers are **"Network"** everywhere in UI copy — never "WiFi" — because they may
+be wired Ethernet; this matches the SDK's `Transport.NETWORK`. "WiFi" survives only in
+iconography.
+
 ## Screens & behavior
 
 ### 1. Shop (root)
@@ -84,12 +90,13 @@ its own variant.
 
 **Screen (nav title "Printer", back button):**
 - *Not configured* → **EmptyHero card**: large circular printer badge (muted on `ground`),
-  "No printer connected" (semibold 17), one-line guidance (muted 14, mentions WiFi and
+  "No printer connected" (semibold 17), one-line guidance (muted 14, mentions network and
   Bluetooth), primary pill CTA **"Find Printer"** (magnifier icon), text button
   "Enter IP address manually".
 - *Configured* → **ConnectedHero card**: `accent` check badge; eyebrow
-  "CONNECTED · WiFi|Bluetooth" (11 semibold, letter-spaced, `accent`); printer name (or
-  "Manual configuration"); endpoint subtitle (host : port, or BLE device id) in muted 14;
+  "CONNECTED · Network|Bluetooth" (11 semibold, letter-spaced, `accent`); printer name (or
+  "Network printer" / "Bluetooth printer" when discovery had no name to give); endpoint
+  subtitle (host : port, or BLE device id) in muted 14;
   optional manufacturer chip (`accent` 12%-tint capsule). Below: two half-width pill
   buttons — **Change** (accent-tinted) and **Disconnect** (red-tinted). Then the
   **Paper width card** (title, one-line explainer, segmented 58/80 mm control).
@@ -100,11 +107,11 @@ button (sheet convention); Android/KMP sheets are **full height, no drag handle,
 button** — swipe down (or back) dismisses, and extra chrome on top of that gesture is
 noise. The states region fills the remaining sheet height so spinner/empty states sit
 centered without the sheet jumping between states.
-- Top of sheet: **scan-scope segmented control — All · WiFi · Bluetooth** (persisted in
+- Top of sheet: **scan-scope segmented control — All · Network · Bluetooth** (persisted in
   the settings store as `scanScope`, default All). Changing it restarts the scan with the
   matching SDK `transports` set. This is the user config for what kind of printer to find.
 - *Scanning*: large spinner, "Looking for printers…", guidance line (scope-aware: mention
-  WiFi and/or Bluetooth range to match the selected scope).
+  network and/or Bluetooth range to match the selected scope).
 - *Results*: list rows — 40pt circular accent-tinted printer badge · name (or endpoint if
   nameless) · endpoint subtitle · optional manufacturer caption · trailing chevron. Tap =
   save + dismiss. Header "Tap a printer to connect"; footer link "Don't see your printer?
@@ -112,12 +119,12 @@ centered without the sheet jumping between states.
 - *Error* / *no results*: icon + title + message + "Try again" pill + "Enter manually"
   text button (message mentions Bluetooth range only when scope includes Bluetooth).
 
-**Manual entry — a second sheet/dialog**, form-style: transport toggle (WiFi/Bluetooth on
+**Manual entry — a second sheet/dialog**, form-style: transport toggle (Network/Bluetooth on
 Android & KMP-Android; iOS is IP-only — BLE ids there are scan-derived CoreBluetooth UUIDs,
 not typeable), IP + port (or BLE MAC) fields with inline validation, Save/Cancel.
 
 **Permissions (scope-aware, all platforms):** BLE runtime permissions are requested only
-when the effective scan scope *includes* Bluetooth — a WiFi-only scan must never prompt.
+when the effective scan scope *includes* Bluetooth — a network-only scan must never prompt.
 Android uses the SDK's `BluetoothPermissions` (`required()`/`allGranted()`, then
 `notifyChanged()` after the grant); denial degrades the scan to network-only, never blocks
 it. Manual-BLE save on Android still requests `BLUETOOTH_CONNECT`. iOS needs no permission

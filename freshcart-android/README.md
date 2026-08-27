@@ -1,7 +1,7 @@
 # FreshCart — PrintBeam on native Android
 
 A quick-commerce grocery app (Kotlin + Jetpack Compose) that prints order receipts over
-WiFi or Bluetooth LE when you place an order. This is the reference integration of
+the network or Bluetooth LE when you place an order. This is the reference integration of
 PrintBeam in a **single-platform Android app**.
 
 ## The dependency

@@ -27,15 +27,15 @@ expect class SettingsStore {
  * printer resets those, but the preferred scan scope should survive.
  */
 enum class ScanScope {
-    ALL, WIFI, BLUETOOTH;
+    ALL, NETWORK, BLUETOOTH;
 
     fun toTransports(): Set<Transport> = when (this) {
         ALL -> setOf(Transport.NETWORK, Transport.BLE)
-        WIFI -> setOf(Transport.NETWORK)
+        NETWORK -> setOf(Transport.NETWORK)
         BLUETOOTH -> setOf(Transport.BLE)
     }
 
-    val includesBluetooth: Boolean get() = this != WIFI
+    val includesBluetooth: Boolean get() = this != NETWORK
     val includesWifi: Boolean get() = this != BLUETOOTH
 }
 

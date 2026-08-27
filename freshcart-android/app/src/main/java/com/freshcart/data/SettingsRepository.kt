@@ -81,7 +81,7 @@ class SettingsRepository(context: Context) {
  */
 enum class ScanScope(val transports: Set<Transport>) {
     ALL(setOf(Transport.NETWORK, Transport.BLE)),
-    WIFI(setOf(Transport.NETWORK)),
+    NETWORK(setOf(Transport.NETWORK)),
     BLUETOOTH(setOf(Transport.BLE)),
     ;
 

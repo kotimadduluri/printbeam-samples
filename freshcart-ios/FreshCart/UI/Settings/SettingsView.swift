@@ -128,7 +128,7 @@ private struct ConnectedHero: View {
 
     private var transportLabel: String {
         switch transport {
-        case .network: return "WiFi"
+        case .network: return "Network"
         case .ble: return "Bluetooth"
         }
     }
@@ -210,7 +210,7 @@ private struct EmptyHero: View {
                 Text("No printer connected")
                     .font(.system(size: 17, weight: .semibold))
                     .foregroundStyle(Color.fcInk)
-                Text("Scan for printers on your WiFi network or nearby over Bluetooth to start printing receipts.")
+                Text("Scan for printers on your network or nearby over Bluetooth to start printing receipts.")
                     .font(.system(size: 14))
                     .foregroundStyle(Color.fcMuted)
                     .multilineTextAlignment(.center)
@@ -294,8 +294,8 @@ private struct ScanResultsSheet: View {
     /// connectivity the selected scope actually searches.
     private var reachabilityHint: String {
         switch scope {
-        case .all: return "either connected to the same WiFi network as this device or in Bluetooth range"
-        case .wifi: return "connected to the same WiFi network as this device"
+        case .all: return "either connected to the same network as this device or in Bluetooth range"
+        case .network: return "connected to the same network as this device"
         case .ble: return "within Bluetooth range of this device"
         }
     }

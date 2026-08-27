@@ -91,7 +91,7 @@ extension ScanScopeOption {
     var transports: Set<Transport> {
         switch self {
         case .all: return [Transport.network, Transport.ble]
-        case .wifi: return [Transport.network]
+        case .network: return [Transport.network]
         case .ble: return [Transport.ble]
         }
     }
