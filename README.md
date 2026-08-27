@@ -1,3 +1,10 @@
+<p align="center">
+  <picture>
+    <source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/kotimadduluri/printbeam-sdk/main/assets/logo-dark.svg">
+    <img src="https://raw.githubusercontent.com/kotimadduluri/printbeam-sdk/main/assets/logo-light.svg" alt="PrintBeam" height="76">
+  </picture>
+</p>
+
 # PrintBeam Samples — FreshCart, three ways
 
 Official integration samples for **[PrintBeam](https://github.com/kotimadduluri/printbeam-sdk)**,
