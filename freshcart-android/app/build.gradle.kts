@@ -42,7 +42,7 @@ kotlin {
 
 dependencies {
     // Printlib — resolved from mavenLocal() per settings.gradle.kts.
-    implementation("dev.printbeam:printbeam-android:0.1.0-alpha03")
+    implementation("dev.printbeam:printbeam-android:0.1.0-alpha04")
 
     implementation("androidx.core:core-ktx:1.17.0")
     implementation("androidx.activity:activity-compose:1.11.0")

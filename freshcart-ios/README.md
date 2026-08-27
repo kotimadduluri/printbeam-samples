@@ -19,7 +19,7 @@ Xcode → File → **Add Package Dependencies…** →
 https://github.com/kotimadduluri/printbeam-sdk
 ```
 
-Pin it to the exact version (`0.1.0-alpha03`). The package serves a prebuilt
+Pin it to the exact version (`0.1.0-alpha04`). The package serves a prebuilt
 XCFramework (arm64 device + arm64 simulator). There is nothing else to
 configure.
 
