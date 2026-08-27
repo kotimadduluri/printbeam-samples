@@ -43,9 +43,11 @@ The point of the facade for KMP consumers: after the two one-line platform initi
 - **Cart** — quantity steppers, savings line, and a **Place Order** CTA that prints the
   receipt: printing / success / failure states, order numbers from a persisted counter
   (SharedPreferences / NSUserDefaults) consumed only on a successful print.
-- **Printer settings** — printers that don't advertise mDNS are picked nameless and then
-  asked for their identity via `PrintBeam.queryDeviceInfo` (`resolveNameFromDevice` in the
-  shared `SettingsViewModel`); streaming scan in a bottom sheet with an All / Network / Bluetooth
+- **Printer settings** — network printers show up named in the scan list itself (since
+  alpha03 the SDK asks `GS I` during discovery); a printer that still arrives nameless is
+  asked for its identity via `PrintBeam.queryDeviceInfo` after picking
+  (`resolveNameFromDevice` in the shared `SettingsViewModel`), and the resolved name is
+  re-registered; streaming scan in a bottom sheet with an All / Network / Bluetooth
   scope control (persisted), manual IP (and, on Android,
   BLE MAC) fallback; paper width selection. Android gates the scan behind the SDK's
   `BluetoothPermissions` runtime set via an expect/actual seam; iOS declares
